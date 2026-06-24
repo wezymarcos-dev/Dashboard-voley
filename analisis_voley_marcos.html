@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Análisis Voley — Marcos Pérez Martín</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{--bg:#08080b;--bg2:#0f0f14;--bg3:#16161c;--bg4:#1c1c24;--bg5:#22222c;--border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.11);--text:#f2f2f4;--muted:#9191a0;--dim:#4a4a5a;--cze:#3b82f6;--czeb:rgba(59,130,246,0.15);--czeb2:rgba(59,130,246,0.28);--ira:#ef4444;--irab:rgba(239,68,68,0.15);--irab2:rgba(239,68,68,0.28);--gold:#f59e0b;--green:#22c55e;--acc:#818cf8;--accb:rgba(129,140,248,0.12)}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.6;overflow-x:hidden}
+.view{display:none}.view.active{display:block}
+
+/* HOME */
+#home{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;position:relative;overflow:hidden}
+.home-halo{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:800px;height:400px;background:radial-gradient(ellipse,rgba(129,140,248,0.08) 0%,transparent 65%);pointer-events:none}
+.home-eyebrow{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.14em;color:var(--acc);text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:.75rem}
+.home-eyebrow::before{content:'';width:20px;height:1px;background:var(--acc)}
+.home-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.8rem,6vw,5rem);line-height:.93;letter-spacing:.01em;text-align:center;margin-bottom:.5rem}
+.home-title em{color:var(--acc);font-style:normal}
+.home-match{display:inline-flex;align-items:center;gap:1.25rem;background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:.875rem 1.5rem;margin:1.5rem 0}
+.flag-svg{width:36px;height:24px;border-radius:3px;display:block;flex-shrink:0}
+.home-team{display:flex;flex-direction:column;align-items:center;gap:.3rem}
+.home-team-lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.home-score{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;line-height:1}
+.home-score.cze{color:var(--cze)}.home-score.ira{color:var(--ira)}
+.home-vs{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:.1em;text-align:center}
+.sets-row{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin-bottom:2.5rem}
+.sc{font-family:'DM Mono',monospace;font-size:12px;padding:.3rem .8rem;border-radius:4px;border:1px solid}
+.sc.w{background:var(--czeb);border-color:var(--czeb2);color:var(--cze)}.sc.l{background:var(--irab);border-color:var(--irab2);color:var(--ira)}
+.cards-row{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;max-width:800px;width:100%;margin-bottom:2.5rem}
+.analysis-card{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:2rem;cursor:pointer;transition:border-color .2s,transform .2s,background .2s;position:relative;overflow:hidden}
+.analysis-card:hover{border-color:var(--border2);transform:translateY(-3px);background:var(--bg4)}
+.card-1:hover{border-color:var(--czeb2)}.card-2:hover{border-color:rgba(129,140,248,0.3)}
+.card-num{font-family:'Bebas Neue',sans-serif;font-size:4rem;line-height:1;margin-bottom:.5rem;opacity:.15}
+.card-1 .card-num{color:var(--cze)}.card-2 .card-num{color:var(--acc)}
+.card-tag{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.75rem;display:inline-block;padding:2px 8px;border-radius:4px}
+.card-1 .card-tag{background:var(--czeb);color:var(--cze);border:1px solid var(--czeb2)}
+.card-2 .card-tag{background:var(--accb);color:var(--acc);border:1px solid rgba(129,140,248,0.25)}
+.card-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;line-height:1.1;margin-bottom:.75rem}
+.card-desc{font-size:13px;color:var(--muted);line-height:1.65;margin-bottom:1.25rem}
+.card-arrow{font-size:20px;color:var(--dim);transition:color .2s,transform .2s}
+.analysis-card:hover .card-arrow{color:var(--text);transform:translateX(4px)}
+.home-meta{display:flex;gap:2rem;flex-wrap:wrap;justify-content:center}
+.mi .ml{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--dim);text-transform:uppercase}
+.mi .mv{font-size:13px;color:var(--muted);font-weight:500}
+
+/* SHARED */
+.top-nav{position:sticky;top:0;z-index:100;background:rgba(8,8,11,0.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:.6rem 0}
+.top-nav-inner{max-width:1080px;margin:0 auto;padding:0 2rem;display:flex;align-items:center;gap:.5rem;overflow-x:auto;scrollbar-width:none}
+.top-nav-inner::-webkit-scrollbar{display:none}
+.back-btn{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--bg3);border:1px solid var(--border2);cursor:pointer;padding:.4rem .875rem;border-radius:4px;white-space:nowrap;margin-right:.5rem;transition:color .15s}
+.back-btn:hover{color:var(--text)}
+.nav-btn{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);background:none;border:none;cursor:pointer;padding:.4rem .75rem;border-radius:4px;white-space:nowrap;transition:color .15s,background .15s}
+.nav-btn:hover{color:var(--muted);background:var(--bg3)}.nav-btn.active{color:var(--acc);background:var(--accb)}
+.a-header{background:var(--bg2);border-bottom:1px solid var(--border);padding:3rem 0 2.5rem;position:relative;overflow:hidden}
+.halo{position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:700px;height:350px;background:radial-gradient(ellipse,rgba(129,140,248,0.08) 0%,transparent 65%);pointer-events:none}
+.wrap{max-width:1080px;margin:0 auto;padding:0 2rem}
+.eyebrow{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.14em;color:var(--acc);text-transform:uppercase;margin-bottom:.875rem;display:flex;align-items:center;gap:.75rem}
+.eyebrow::before{content:'';width:20px;height:1px;background:var(--acc)}
+h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.2rem,5vw,4rem);line-height:.93;letter-spacing:.01em;margin-bottom:1.75rem}
+h1 em{color:var(--acc);font-style:normal}
+.match-card{display:inline-flex;align-items:center;gap:1.25rem;background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:.875rem 1.5rem;margin-bottom:1.25rem}
+.team-col{display:flex;flex-direction:column;align-items:center;gap:.3rem}
+.team-lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.team-sc{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;line-height:1}
+.team-sc.cze{color:var(--cze)}.team-sc.ira{color:var(--ira)}
+.match-mid{display:flex;flex-direction:column;align-items:center;gap:.3rem}
+.vs-lbl{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:.1em}
+main{max-width:1080px;margin:0 auto;padding:3rem 2rem}
+.section{margin-bottom:4rem;scroll-margin-top:56px}
+.sec-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.sec-title{font-family:'Bebas Neue',sans-serif;font-size:1.9rem;letter-spacing:.02em;margin-bottom:.4rem}
+.sec-sub{font-size:13px;color:var(--muted);line-height:1.65;margin-bottom:1.75rem;max-width:660px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.25rem}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-radius:10px;overflow:hidden;margin-bottom:1.5rem}
+.card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:1.25rem 1.5rem}
+.card-lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;margin-bottom:.875rem}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:1.5rem}
+.kpi{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem}
+.kpi .kl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--dim);text-transform:uppercase;margin-bottom:.4rem}
+.kpi .kv{font-family:'Bebas Neue',sans-serif;font-size:2.1rem;line-height:1;margin-bottom:.2rem}
+.kpi .ks{font-size:12px;color:var(--muted)}
+.b4-cell{background:var(--bg3);padding:1.5rem 1rem;text-align:center}
+.b4-lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;margin-bottom:.4rem}
+.b4-n{font-family:'Bebas Neue',sans-serif;font-size:3rem;line-height:1;margin-bottom:.2rem}
+.b4-p{font-size:12px;color:var(--muted)}
+.insight{border-radius:0 8px 8px 0;padding:.875rem 1.1rem;border-left:3px solid var(--acc);background:var(--bg4);margin-top:.875rem}
+.insight.cze{border-left-color:var(--cze)}.insight.ira{border-left-color:var(--ira)}.insight.gold{border-left-color:var(--gold)}.insight.green{border-left-color:var(--green)}.insight.red{border-left-color:var(--ira)}
+.it{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text);margin-bottom:.3rem}
+.insight p{font-size:13px;color:var(--muted);line-height:1.65}
+.cw{position:relative;width:100%}
+.leg{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:10px;font-size:12px;color:var(--muted)}
+.leg span{display:flex;align-items:center;gap:5px}
+.lsq{width:10px;height:10px;border-radius:2px;display:inline-block;flex-shrink:0}
+.sr{display:flex;justify-content:space-between;align-items:center;padding:.55rem 0;border-bottom:1px solid var(--border)}
+.sr:last-child{border-bottom:none}
+.sr-l{font-size:13px;color:var(--muted)}.sr-v{font-family:'DM Mono',monospace;font-size:13px;color:var(--text);font-weight:500}
+.bc-row{margin-bottom:.875rem}
+.bc-labels{display:flex;justify-content:space-between;font-size:12px;margin-bottom:.3rem}
+.bc-track{height:6px;background:var(--bg5);border-radius:6px;overflow:hidden;display:flex}
+.bc-cze{background:var(--cze);height:100%;border-radius:6px 0 0 6px}
+.bc-ira{background:var(--ira);height:100%;border-radius:0 6px 6px 0}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.07em;color:var(--dim);text-transform:uppercase;padding:7px 10px;border-bottom:1px solid var(--border);text-align:left;font-weight:400}
+.tbl td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}.tbl td.r{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
+.tbl tr:hover td{background:var(--bg4);color:var(--text)}
+.pill{display:inline-block;font-family:'DM Mono',monospace;font-size:11px;padding:2px 7px;border-radius:4px;font-weight:500}
+.pill.gen{background:rgba(34,197,94,.12);color:#22c55e;border:1px solid rgba(34,197,94,.2)}
+.pill.rie{background:rgba(239,68,68,.12);color:#ef4444;border:1px solid rgba(239,68,68,.2)}
+.pill.neu{background:rgba(129,140,248,.12);color:var(--acc);border:1px solid rgba(129,140,248,.2)}
+.matrix-wrap{overflow-x:auto}
+.matrix{border-collapse:collapse;font-size:12px;width:100%}
+.matrix th{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.06em;color:var(--dim);text-transform:uppercase;padding:6px 10px;border:1px solid var(--border);text-align:center;font-weight:400;background:var(--bg4)}
+.matrix td{padding:8px 10px;border:1px solid var(--border);text-align:center;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted)}
+.matrix td.h0{background:var(--bg3)}.matrix td.h1{background:rgba(129,140,248,0.08);color:var(--text)}.matrix td.h2{background:rgba(129,140,248,0.18);color:var(--text)}.matrix td.h3{background:rgba(129,140,248,0.32);color:var(--text)}.matrix td.h4{background:rgba(129,140,248,0.50);color:#fff;font-weight:500}.matrix td.h5{background:rgba(129,140,248,0.70);color:#fff;font-weight:600}.matrix td.diag{outline:2px solid var(--acc);outline-offset:-2px}
+.sup-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:1.25rem 1.5rem}
+.sup-team-header{display:flex;align-items:center;gap:.6rem;margin-bottom:1rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+.sup-bar-row{display:flex;align-items:center;gap:.75rem;margin-bottom:.6rem}
+.sup-bar-label{font-size:12px;color:var(--muted);width:100px;flex-shrink:0}
+.sup-bar-track{flex:1;height:8px;background:var(--bg5);border-radius:4px;overflow:hidden}
+.sup-bar-fill{height:100%;border-radius:4px}
+.sup-bar-val{font-family:'DM Mono',monospace;font-size:12px;color:var(--text);width:38px;flex-shrink:0;text-align:right}
+.saque-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:1rem;align-items:center;margin-bottom:1.5rem}
+.saque-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:1.25rem;text-align:center}
+.saque-mid{text-align:center}
+.saque-mini{display:flex;justify-content:center;gap:1rem;margin-top:.75rem}
+.sm-n{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;line-height:1}
+.sm-l{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.07em}
+.set-tabs{display:flex;gap:.5rem;margin-bottom:1.25rem;flex-wrap:wrap}
+.set-tab{font-family:'DM Mono',monospace;font-size:11px;padding:.3rem .75rem;border-radius:4px;border:1px solid var(--border);color:var(--dim);cursor:pointer;background:none;transition:all .15s}
+.set-tab:hover{color:var(--muted);background:var(--bg3)}.set-tab.active{color:var(--acc);background:var(--accb);border-color:rgba(129,140,248,.25)}
+#modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:1.5rem}
+#modal-box{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;max-width:700px;width:100%;max-height:90vh;overflow-y:auto;position:relative;transform:translateY(24px);opacity:0;transition:transform .35s ease,opacity .35s ease}
+footer{border-top:1px solid var(--border);padding:1.75rem 2rem;text-align:center}
+footer p{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:.05em}
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .5s ease,transform .5s ease}
+.reveal.visible{opacity:1;transform:none}
+@media(max-width:700px){.g2,.g3{grid-template-columns:1fr}.g4{grid-template-columns:1fr 1fr}.saque-grid{grid-template-columns:1fr}.cards-row{grid-template-columns:1fr}.match-card{flex-direction:column}}
+</style>
+</head>
+<body>
+<!-- HOME -->
+<div id="home" class="view active">
+  <div class="home-halo"></div>
+  <div class="home-eyebrow">Análisis Observacional · Especialización Deportiva de Voleibol</div>
+  <h1 class="home-title">Análisis de<br><em>intercambios</em><br>en voleibol</h1>
+  <div class="home-match">
+    <div class="home-team">
+      <svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="12" fill="#fff"/><rect y="12" width="36" height="12" fill="#D7141A"/><polygon points="0,0 18,12 0,24" fill="#11457E"/></svg>
+      <div class="home-team-lbl">Rep. Checa</div><div class="home-score cze">3</div>
+    </div>
+    <div class="home-vs"><div>VS</div><div style="font-size:11px;color:var(--dim);margin-top:2px">25·09·2025</div></div>
+    <div class="home-team">
+      <svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="8" fill="#239f40"/><rect y="8" width="36" height="8" fill="#fff"/><rect y="16" width="36" height="8" fill="#DA0000"/></svg>
+      <div class="home-team-lbl">Irán</div><div class="home-score ira">1</div>
+    </div>
+  </div>
+  <div class="sets-row">
+    <div class="sc l">Set 1 · 22–25</div><div class="sc w">Set 2 · 27–25</div><div class="sc w">Set 3 · 25–20</div><div class="sc w">Set 4 · 25–21</div>
+  </div>
+  <div class="cards-row">
+    <div class="analysis-card card-1" onclick="showView('a1')">
+      <div class="card-num">01</div>
+      <div class="card-tag">Análisis principal</div>
+      <div class="card-title">Atacantes disponibles en el intercambio</div>
+      <div class="card-desc">Cuántas opciones ofensivas tiene el colocador en cada intercambio y cómo influye en la probabilidad de ganar el punto. Distribución, eficacia, ventaja ofensiva y matriz de transición.</div>
+      <div class="card-arrow">→</div>
+    </div>
+    <div class="analysis-card card-2" onclick="showView('a2')">
+      <div class="card-num">02</div>
+      <div class="card-tag">Análisis complementario</div>
+      <div class="card-title">Secuencias de juego, saque y resistencia</div>
+      <div class="card-desc">Análisis por complejos K1–K4. El saque como condicionante del sistema ofensivo. Eficacia por secuencia, resistencia en rally y evolución a lo largo del partido.</div>
+      <div class="card-arrow">→</div>
+    </div>
+  </div>
+  <div class="home-meta">
+    <div class="mi"><div class="ml">Autor</div><div class="mv">Marcos Pérez Martín</div></div>
+    <div class="mi"><div class="ml">Profesor</div><div class="mv">Aurelio Ureña</div></div>
+    <div class="mi"><div class="ml">Centro</div><div class="mv">Facultad de Ciencias del Deporte · UGR</div></div>
+    <div class="mi"><div class="ml">Competición</div><div class="mv">FIVB World Championship 2025</div></div>
+  </div>
+</div>
+<!-- ANÁLISIS 1 -->
+<div id="a1" class="view">
+  <nav class="top-nav"><div class="top-nav-inner">
+    <button class="back-btn" onclick="showView('home')">← Inicio</button>
+    <button class="nav-btn" onclick="scrollToSec('a1-muestra')">Muestra</button>
+    <button class="nav-btn" onclick="scrollToSec('a1-dist')">Distribución</button>
+    <button class="nav-btn" onclick="scrollToSec('a1-efic')">Prob. Victoria</button>
+    <button class="nav-btn" onclick="scrollToSec('a1-equipos')">Equipos</button>
+    <button class="nav-btn" onclick="scrollToSec('a1-ventaja')">Ventaja ofensiva</button>
+    <button class="nav-btn" onclick="scrollToSec('a1-transicion')">Transición</button>
+    <button class="nav-btn" onclick="scrollToSec('a1-sets')">Por sets</button>
+    <button class="nav-btn" style="background:var(--accb);color:var(--acc);border:1px solid rgba(129,140,248,.25)" onclick="openModal()">Conclusión ↗</button>
+  </div></nav>
+
+  <div class="a-header"><div class="halo"></div><div class="wrap">
+    <div class="eyebrow">Análisis 01 · Atacantes disponibles en el intercambio</div>
+    <h1>Número de atacantes<br>disponibles en<br><em>la colocación</em></h1>
+    <div class="match-card">
+      <div class="team-col"><svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="12" fill="#fff"/><rect y="12" width="36" height="12" fill="#D7141A"/><polygon points="0,0 18,12 0,24" fill="#11457E"/></svg><div class="team-lbl">Rep. Checa</div><div class="team-sc cze">3</div></div>
+      <div class="match-mid"><div class="vs-lbl">VS</div><div style="font-size:11px;color:var(--dim)">FIVB 2025</div></div>
+      <div class="team-col"><svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="8" fill="#239f40"/><rect y="8" width="36" height="8" fill="#fff"/><rect y="16" width="36" height="8" fill="#DA0000"/></svg><div class="team-lbl">Irán</div><div class="team-sc ira">1</div></div>
+    </div>
+    <div class="sets-row"><div class="sc l">Set 1 · 22–25</div><div class="sc w">Set 2 · 27–25</div><div class="sc w">Set 3 · 25–20</div><div class="sc w">Set 4 · 25–21</div></div>
+  </div></div>
+
+  <main>
+    <!-- MUESTRA -->
+    <div class="section reveal" id="a1-muestra">
+      <div class="sec-label">01 · Muestra</div>
+      <div class="sec-title">¿Qué se ha analizado?</div>
+      <div class="sec-sub">De los 190 puntos del partido, 138 llegaron a la fase de colocación. En esos puntos el colocador tomó una decisión táctica con un número determinado de atacantes habilitados. Ese número — los atacantes disponibles en cada intercambio — es la variable central de este análisis.</div>
+      <div class="kpi-row">
+        <div class="kpi"><div class="kl">Puntos totales</div><div class="kv" style="color:var(--text)">190</div><div class="ks">4 sets</div></div>
+        <div class="kpi"><div class="kl">Intercambios válidos</div><div class="kv" style="color:var(--green)">192</div><div class="ks">unidad de análisis</div></div>
+        <div class="kpi"><div class="kl"><svg width="12" height="8" viewBox="0 0 36 24" style="border-radius:2px;vertical-align:middle;margin-right:3px"><rect width="36" height="12" fill="#fff"/><rect y="12" width="36" height="12" fill="#D7141A"/><polygon points="0,0 18,12 0,24" fill="#11457E"/></svg>Checa</div><div class="kv" style="color:var(--cze)">93</div><div class="ks">intercambios</div></div>
+        <div class="kpi"><div class="kl"><svg width="12" height="8" viewBox="0 0 36 24" style="border-radius:2px;vertical-align:middle;margin-right:3px"><rect width="36" height="8" fill="#239f40"/><rect y="8" width="36" height="8" fill="#fff"/><rect y="16" width="36" height="8" fill="#DA0000"/></svg>Irán</div><div class="kv" style="color:var(--ira)">99</div><div class="ks">intercambios</div></div>
+        <div class="kpi"><div class="kl">Sin colocación</div><div class="kv" style="color:var(--gold)">52</div><div class="ks">27.4% — ace / error recep.</div></div>
+      </div>
+      <div class="saque-grid">
+        <div class="saque-card" style="border-color:var(--czeb2)"><svg width="40" height="27" viewBox="0 0 36 24" style="border-radius:4px;margin-bottom:.5rem"><rect width="36" height="12" fill="#fff"/><rect y="12" width="36" height="12" fill="#D7141A"/><polygon points="0,0 18,12 0,24" fill="#11457E"/></svg><div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem">República Checa</div><div class="saque-mini"><div><div class="sm-n" style="color:var(--green)">6</div><div class="sm-l">aces</div></div><div><div class="sm-n" style="color:var(--ira)">18</div><div class="sm-l">fallos</div></div></div></div>
+        <div class="saque-mid"><div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.25rem">Sin colocación</div><div style="font-family:'Bebas Neue',sans-serif;font-size:2.8rem;color:var(--text)">52</div><div style="font-size:12px;color:var(--muted)">27.4% del partido</div><div style="display:flex;gap:1rem;justify-content:center;margin-top:.75rem"><div style="text-align:center"><div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--green)">13</div><div class="sm-l">aces</div></div><div style="text-align:center"><div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--ira)">39</div><div class="sm-l">fallos</div></div></div></div>
+        <div class="saque-card" style="border-color:var(--irab2)"><svg width="40" height="27" viewBox="0 0 36 24" style="border-radius:4px;margin-bottom:.5rem"><rect width="36" height="8" fill="#239f40"/><rect y="8" width="36" height="8" fill="#fff"/><rect y="16" width="36" height="8" fill="#DA0000"/></svg><div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem">Irán</div><div class="saque-mini"><div><div class="sm-n" style="color:var(--green)">7</div><div class="sm-l">aces</div></div><div><div class="sm-n" style="color:var(--ira)">21</div><div class="sm-l">fallos</div></div></div></div>
+      </div>
+      <div class="g2">
+        <div class="insight gold"><div class="it">El saque agresivo tiene un coste alto</div><p>Ambos equipos sacan agresivo — y lo pagan. Por cada ace consiguen 3 errores directos. Esto no significa que sacar agresivo sea un error: un buen saque que no da ace pero complica la recepción rival no aparece aquí como fallo, pero sí limita las opciones del colocador en el siguiente intercambio. El 27.4% de los puntos del partido terminaron antes de llegar al ataque.</p></div>
+        <div class="insight"><div class="it">Los freeballes se excluyen del análisis</div><p>Cuando el balón llega como freeball — sin ataque real detrás — el equipo receptor tiene tiempo de sobra para organizar su sistema. No hay presión, no hay decisión táctica bajo tensión. Son situaciones tan favorables que no son comparables con el resto de intercambios, por eso se analizan por separado.</p></div>
+      </div>
+    </div>
+
+    <!-- DISTRIBUCIÓN -->
+    <div class="section reveal" id="a1-dist">
+      <div class="sec-label">02 · Distribución global</div>
+      <div class="sec-title">¿Cuántas opciones tuvo el colocador?</div>
+      <div class="sec-sub">En el alto rendimiento el juego raramente se queda a medias. O la recepción es tan buena que el colocador puede elegir entre todas las opciones, o el saque rival la ha destrozado y no tiene más que una. Este gráfico muestra exactamente esa polarización.</div>
+      <div class="g4">
+        <div class="b4-cell"><div class="b4-lbl">1 atacante</div><div class="b4-n" style="color:var(--acc)">70</div><div class="b4-p">36.5% · más frecuente</div></div>
+        <div class="b4-cell"><div class="b4-lbl">2 atacantes</div><div class="b4-n" style="color:var(--cze)">25</div><div class="b4-p">13.0% · menos frecuente</div></div>
+        <div class="b4-cell"><div class="b4-lbl">3 atacantes</div><div class="b4-n" style="color:var(--green)">36</div><div class="b4-p">18.8% de intercambios</div></div>
+        <div class="b4-cell"><div class="b4-lbl">&gt;3 atacantes</div><div class="b4-n" style="color:var(--gold)">61</div><div class="b4-p">31.8% · sistema completo</div></div>
+      </div>
+      <div class="g2">
+        <div class="cw" style="height:230px"><canvas id="c1-freq"></canvas></div>
+        <div class="card">
+          <div class="card-lbl">Estadísticos del partido</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:3.8rem;color:var(--acc);line-height:1;margin-bottom:.25rem">2.46</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:1.25rem">atacantes disponibles de media por intercambio</div>
+          <div class="sr"><span class="sr-l">Situación más frecuente</span><span class="sr-v">1 atacante (36.5%)</span></div>
+          <div class="sr"><span class="sr-l">Mediana del partido</span><span class="sr-v">3 atacantes</span></div>
+          <div class="sr"><span class="sr-l">Sistema completo (&gt;3)</span><span class="sr-v">31.8%</span></div>
+          <div class="sr"><span class="sr-l">Con 3 o más opciones</span><span class="sr-v">50.5%</span></div>
+        </div>
+      </div>
+      <div class="insight"><div class="it">Distribución bimodal: dos modelos de juego en el mismo partido</div><p>Lo más llamativo de esta distribución es que el 2 atacantes es el escenario menos frecuente. En el alto nivel el partido raramente se queda en un estado intermedio: o la recepción es buena y el colocador tiene todas las opciones, o el saque ha presionado tanto que solo queda una. Cuando hay 1 solo atacante, el bloqueo rival ya lleva ventaja antes de que el colocador toque el balón.</p></div>
+    </div>
+
+    <!-- EFICACIA -->
+    <div class="section reveal" id="a1-efic">
+      <div class="sec-label">03 · Probabilidad de ganar el punto</div>
+      <div class="sec-title">Más opciones, más victorias</div>
+      <div class="sec-sub">Este gráfico responde a la pregunta clave: ¿cuánto más probable es ganar el punto si el colocador tiene 3 opciones en vez de 1? De todos los intercambios en que un equipo atacó con X atacantes, se calcula cuántas veces ganó el punto — independientemente de si ese ataque fue el que lo cerró o no.</div>
+      <div class="g2" style="margin-bottom:1.25rem">
+        <div class="cw" style="height:260px"><canvas id="c1-prob"></canvas></div>
+        <div class="card">
+          <div class="card-lbl">Probabilidad de ganar el punto por equipo</div>
+          <div class="sr"><span class="sr-l">0 atacantes</span><span style="display:flex;gap:.5rem;font-family:'DM Mono',monospace;font-size:12px"><span style="color:var(--cze)">CZE 16.7%</span><span style="color:var(--ira)">IRA 20.0%</span></span></div>
+          <div class="sr"><span class="sr-l">1 atacante</span><span style="display:flex;gap:.5rem;font-family:'DM Mono',monospace;font-size:12px"><span style="color:var(--cze)">CZE 66.7%</span><span style="color:var(--ira)">IRA 56.8%</span></span></div>
+          <div class="sr"><span class="sr-l">2 atacantes</span><span style="display:flex;gap:.5rem;font-family:'DM Mono',monospace;font-size:12px"><span style="color:var(--cze)">CZE 66.7%</span><span style="color:var(--ira)">IRA 76.9%</span></span></div>
+          <div class="sr"><span class="sr-l">3 atacantes</span><span style="display:flex;gap:.5rem;font-family:'DM Mono',monospace;font-size:12px"><span style="color:var(--cze)">CZE 89.5%</span><span style="color:var(--ira)">IRA 76.5%</span></span></div>
+          <div class="sr"><span class="sr-l">&gt;3 atacantes</span><span style="display:flex;gap:.5rem;font-family:'DM Mono',monospace;font-size:12px"><span style="color:var(--cze)">CZE 79.3%</span><span style="color:var(--ira)">IRA 65.6%</span></span></div>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="insight cze"><div class="it">Checa domina con 3 atacantes: la diferencia clave</div><p>Con 3 atacantes disponibles, el colocador checo gana el punto casi 9 de cada 10 veces. Es el dato más discriminante de todo el partido. La razón es táctica: con 3 opciones el colocador puede elegir entre el centro, el extremo y el segundo tempo — el bloqueo iraní no puede cerrarse sobre ninguno en concreto, y cuando duda, el rematador tiene espacio libre.</p></div>
+        <div class="insight ira"><div class="it">Irán más eficaz con 2 atacantes: único escenario favorable</div><p>Con 2 atacantes Irán gana más que Checa. Es un detalle interesante: el sistema de ataque iraní con 2 opciones es más efectivo que el checo en la misma situación. Posiblemente su combinación de 2 atacantes es más reconocible y rápida. El problema es que en cuanto Checa despliega 3 o más, la diferencia se invierte completamente.</p></div>
+      </div>
+    </div>
+
+    <!-- EQUIPOS -->
+    <div class="section reveal" id="a1-equipos">
+      <div class="sec-label">04 · Comparativa por equipo</div>
+      <div class="sec-title"><svg width="28" height="19" viewBox="0 0 36 24" style="border-radius:3px;vertical-align:middle;margin-right:8px"><rect width="36" height="12" fill="#fff"/><rect y="12" width="36" height="12" fill="#D7141A"/><polygon points="0,0 18,12 0,24" fill="#11457E"/></svg>Checa vs Irán<svg width="28" height="19" viewBox="0 0 36 24" style="border-radius:3px;vertical-align:middle;margin-left:8px"><rect width="36" height="8" fill="#239f40"/><rect y="8" width="36" height="8" fill="#fff"/><rect y="16" width="36" height="8" fill="#DA0000"/></svg></div>
+      <div class="sec-sub">Los dos equipos llegan a sus intercambios con prácticamente las mismas opciones sobre el papel. La diferencia no está en el sistema — está en lo que hace el colocador cuando tiene esas opciones, y en cómo las ejecutan los rematadores.</div>
+      <div class="g2" style="margin-bottom:1.5rem">
+        <div class="cw" style="height:260px"><canvas id="c1-equipos"></canvas></div>
+        <div>
+          <div class="card" style="margin-bottom:1rem">
+            <div class="card-lbl">Media de atacantes disponibles por intercambio</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem"><div style="display:flex;align-items:center;gap:.5rem"><svg width="20" height="13" viewBox="0 0 36 24" style="border-radius:2px"><rect width="36" height="12" fill="#fff"/><rect y="12" width="36" height="12" fill="#D7141A"/><polygon points="0,0 18,12 0,24" fill="#11457E"/></svg><span style="font-size:13px;color:var(--muted)">Rep. Checa</span></div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.9rem;color:var(--cze)">2.47</div></div>
+            <div style="display:flex;justify-content:space-between;align-items:center"><div style="display:flex;align-items:center;gap:.5rem"><svg width="20" height="13" viewBox="0 0 36 24" style="border-radius:2px"><rect width="36" height="8" fill="#239f40"/><rect y="8" width="36" height="8" fill="#fff"/><rect y="16" width="36" height="8" fill="#DA0000"/></svg><span style="font-size:13px;color:var(--muted)">Irán</span></div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.9rem;color:var(--ira)">2.44</div></div>
+            <div style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--border);font-size:12px;color:var(--dim);font-family:'DM Mono',monospace">Sin diferencia significativa entre equipos</div>
+          </div>
+          <div class="insight cze"><div class="it">El 3-1 no se explica por el volumen de opciones</div><p>Los dos equipos llegan a sus intercambios con prácticamente las mismas opciones — 2.47 vs 2.44 de media. Esto significa que el sistema ofensivo de ambos es igual de complejo en papel. La diferencia está en lo que hace el colocador cuando tiene esas opciones: el checo las convierte en puntos con más frecuencia, especialmente cuando tiene 3 o más atacantes habilitados.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VENTAJA OFENSIVA -->
+    <div class="section reveal" id="a1-ventaja">
+      <div class="sec-label">05 · Ventaja ofensiva</div>
+      <div class="sec-title">¿Quién supera al rival en cada transición?</div>
+      <div class="sec-sub">Cada vez que un equipo ataca, el rival tiene que montar su propio sistema ofensivo para el siguiente intercambio. Si lo monta con más atacantes de los que usó el rival, genera ventaja — el bloqueo no puede cerrarse sobre todos. Si monta menos, está en desventaja — el bloqueo ya sabe adónde va el balón.</div>
+      <div class="cw" style="height:220px;margin-bottom:1.5rem"><canvas id="c1-ventaja"></canvas></div>
+      <div class="g2">
+        <div class="sup-card">
+          <div class="sup-team-header"><svg width="24" height="16" viewBox="0 0 36 24" style="border-radius:2px"><rect width="36" height="12" fill="#fff"/><rect y="12" width="36" height="12" fill="#D7141A"/><polygon points="0,0 18,12 0,24" fill="#11457E"/></svg><span style="font-size:13px;font-weight:500">Checa responde al ataque iraní</span></div>
+          <div class="sup-bar-row"><div class="sup-bar-label" style="color:var(--green)">⚡ Generador</div><div class="sup-bar-track"><div class="sup-bar-fill" style="width:31.0%;background:var(--green)"></div></div><div class="sup-bar-val" style="color:var(--green)">31.0%</div></div>
+          <div class="sup-bar-row"><div class="sup-bar-label" style="color:var(--acc)">— Neutro</div><div class="sup-bar-track"><div class="sup-bar-fill" style="width:24.1%;background:var(--acc)"></div></div><div class="sup-bar-val" style="color:var(--acc)">24.1%</div></div>
+          <div class="sup-bar-row"><div class="sup-bar-label" style="color:var(--ira)">⚠ Riesgo</div><div class="sup-bar-track"><div class="sup-bar-fill" style="width:44.8%;background:var(--ira)"></div></div><div class="sup-bar-val" style="color:var(--ira)">44.8%</div></div>
+          <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)">
+            <table class="tbl" style="font-size:12px"><thead><tr><th>Rival ataca con</th><th>Generador</th><th>Neutro</th><th>Riesgo</th></tr></thead>
+            <tbody>
+              <tr><td>Freeball (0)</td><td class="r"><span class="pill gen">100%</span></td><td class="r">—</td><td class="r">—</td></tr>
+              <tr><td>1 atacante</td><td class="r"><span class="pill gen">40.0%</span></td><td class="r"><span class="pill neu">60.0%</span></td><td class="r">—</td></tr>
+              <tr><td>2 atacantes</td><td class="r">—</td><td class="r">—</td><td class="r"><span class="pill rie">100%</span></td></tr>
+              <tr><td>3 atacantes</td><td class="r">—</td><td class="r">—</td><td class="r"><span class="pill rie">100%</span></td></tr>
+              <tr><td>&gt;3 atacantes</td><td class="r">—</td><td class="r"><span class="pill neu">14.2%</span></td><td class="r"><span class="pill rie">85.8%</span></td></tr>
+            </tbody></table>
+          </div>
+        </div>
+        <div class="sup-card">
+          <div class="sup-team-header"><svg width="24" height="16" viewBox="0 0 36 24" style="border-radius:2px"><rect width="36" height="8" fill="#239f40"/><rect y="8" width="36" height="8" fill="#fff"/><rect y="16" width="36" height="8" fill="#DA0000"/></svg><span style="font-size:13px;font-weight:500">Irán responde al ataque checo</span></div>
+          <div class="sup-bar-row"><div class="sup-bar-label" style="color:var(--green)">⚡ Generador</div><div class="sup-bar-track"><div class="sup-bar-fill" style="width:47.6%;background:var(--green)"></div></div><div class="sup-bar-val" style="color:var(--green)">47.6%</div></div>
+          <div class="sup-bar-row"><div class="sup-bar-label" style="color:var(--acc)">— Neutro</div><div class="sup-bar-track"><div class="sup-bar-fill" style="width:23.8%;background:var(--acc)"></div></div><div class="sup-bar-val" style="color:var(--acc)">23.8%</div></div>
+          <div class="sup-bar-row"><div class="sup-bar-label" style="color:var(--ira)">⚠ Riesgo</div><div class="sup-bar-track"><div class="sup-bar-fill" style="width:28.6%;background:var(--ira)"></div></div><div class="sup-bar-val" style="color:var(--ira)">28.6%</div></div>
+          <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)">
+            <table class="tbl" style="font-size:12px"><thead><tr><th>Rival ataca con</th><th>Generador</th><th>Neutro</th><th>Riesgo</th></tr></thead>
+            <tbody>
+              <tr><td>Freeball (0)</td><td class="r"><span class="pill gen">100%</span></td><td class="r">—</td><td class="r">—</td></tr>
+              <tr><td>1 atacante</td><td class="r"><span class="pill gen">44.5%</span></td><td class="r"><span class="pill neu">44.5%</span></td><td class="r"><span class="pill rie">11%</span></td></tr>
+              <tr><td>2 atacantes</td><td class="r">—</td><td class="r">—</td><td class="r"><span class="pill rie">100%</span></td></tr>
+              <tr><td>3 atacantes</td><td class="r">—</td><td class="r">—</td><td class="r"><span class="pill rie">100%</span></td></tr>
+              <tr><td>&gt;3 atacantes</td><td class="r">—</td><td class="r"><span class="pill neu">16.6%</span></td><td class="r"><span class="pill rie">83.4%</span></td></tr>
+            </tbody></table>
+          </div>
+        </div>
+      </div>
+      <div class="g2" style="margin-top:1rem">
+        <div class="insight red"><div class="it">Checa es vulnerable ante el ataque organizado iraní</div><p>Cuando Irán organiza bien su ataque y llega con 2 o más atacantes, Checa casi nunca puede responder con el mismo volumen. En la práctica, una buena acción ofensiva de Irán destruye el siguiente sistema de Checa. El receptor checo no tiene tiempo de posicionarse correctamente y el colocador se queda sin opciones. Solo cuando Irán ataca simple o manda un freeball logra Checa recuperar la iniciativa.</p></div>
+        <div class="insight green"><div class="it">Irán genera más ventaja pero no la convierte en victorias</div><p>Irán genera superioridad numérica en casi la mitad de las transiciones — más que Checa. Pero ganar el partido no es solo generar opciones, es convertirlas. Irán tiene más momentos de ventaja pero los cierra peor. Checa tiene menos ventajas pero cuando las tiene, raramente las desperdicia. Esa diferencia de ejecución es lo que separa el 3-1 de un resultado más igualado.</p></div>
+      </div>
+    </div>
+
+    <!-- TRANSICIÓN -->
+    <div class="section reveal" id="a1-transicion">
+      <div class="sec-label">06 · Matriz de transición</div>
+      <div class="sec-title">De un ataque al siguiente</div>
+      <div class="sec-sub">Esta tabla muestra qué pasa en el siguiente intercambio después de cada ataque. Si Irán ataca con 3 atacantes, ¿con cuántos responde Checa? La respuesta define si el partido se abre o se cierra. Las celdas más oscuras son los caminos más frecuentes.</div>
+      <div class="g2">
+        <div>
+          <div class="card-lbl" style="margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem"><svg width="16" height="11" viewBox="0 0 36 24" style="border-radius:2px"><rect width="36" height="12" fill="#fff"/><rect y="12" width="36" height="12" fill="#D7141A"/><polygon points="0,0 18,12 0,24" fill="#11457E"/></svg>Checa responde al ataque de Irán</div>
+          <div class="matrix-wrap"><table class="matrix">
+            <thead><tr><th>IRA→ / CZE↓</th><th>1</th><th>2</th><th>3</th><th>&gt;3</th></tr></thead>
+            <tbody>
+              <tr><td style="text-align:left;color:var(--muted);font-size:12px">IRA ataca 1</td><td class="h3 diag">60%</td><td class="h1">10%</td><td class="h2">20%</td><td class="h1">10%</td></tr>
+              <tr><td style="text-align:left;color:var(--muted);font-size:12px">IRA ataca 2</td><td class="h5">100%</td><td class="h0">0%</td><td class="h0">0%</td><td class="h0">0%</td></tr>
+              <tr><td style="text-align:left;color:var(--muted);font-size:12px">IRA ataca 3</td><td class="h4">80%</td><td class="h2">20%</td><td class="h0">0%</td><td class="h0">0%</td></tr>
+              <tr><td style="text-align:left;color:var(--muted);font-size:12px">IRA ataca &gt;3</td><td class="h4">71%</td><td class="h0">0%</td><td class="h1">14%</td><td class="h1">14%</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+        <div>
+          <div class="card-lbl" style="margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem"><svg width="16" height="11" viewBox="0 0 36 24" style="border-radius:2px"><rect width="36" height="8" fill="#239f40"/><rect y="8" width="36" height="8" fill="#fff"/><rect y="16" width="36" height="8" fill="#DA0000"/></svg>Irán responde al ataque de Checa</div>
+          <div class="matrix-wrap"><table class="matrix">
+            <thead><tr><th>CZE→ / IRA↓</th><th>1</th><th>2</th><th>3</th><th>&gt;3</th></tr></thead>
+            <tbody>
+              <tr><td style="text-align:left;color:var(--muted);font-size:12px">CZE ataca 1</td><td class="h3 diag">50%</td><td class="h1">12%</td><td class="h1">12%</td><td class="h2">25%</td></tr>
+              <tr><td style="text-align:left;color:var(--muted);font-size:12px">CZE ataca 2</td><td class="h5">100%</td><td class="h0">0%</td><td class="h0">0%</td><td class="h0">0%</td></tr>
+              <tr><td style="text-align:left;color:var(--muted);font-size:12px">CZE ataca 3</td><td class="h5">100%</td><td class="h0">0%</td><td class="h0">0%</td><td class="h0">0%</td></tr>
+              <tr><td style="text-align:left;color:var(--muted);font-size:12px">CZE ataca &gt;3</td><td class="h3">60%</td><td class="h0">0%</td><td class="h2">20%</td><td class="h2">20%</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+      <div class="g2" style="margin-top:1rem">
+        <div class="insight"><div class="it">El ataque con 2-3 colapsa al rival a 1 opción</div><p>El patrón más claro de todo el partido: cuando atacas con 2 o 3 atacantes, el rival casi siempre colapsa a 1 en su respuesta. Lo que esto significa en el juego real es que un ataque bien organizado no solo busca el punto — también destruye el siguiente sistema del rival. El defensor tiene tan poco tiempo que el colocador contrario recibe el balón sin opciones preparadas.</p></div>
+        <div class="insight gold"><div class="it">Irán aprovecha mejor el ataque simple de Checa</div><p>Cuando Checa ataca con 1 solo atacante — porque ha recibido mal o porque ha sido forzado — Irán aprovecha ese momento para organizar su sistema completo el 25% de las veces. Checa en la misma situación solo lo consigue el 10%. Irán es mejor convirtiendo los ataques simples del rival en oportunidades de amplitud propia. Es un dato relevante para el plan táctico del saque.</p></div>
+      </div>
+    </div>
+
+    <!-- SETS -->
+    <div class="section reveal" id="a1-sets">
+      <div class="sec-label">07 · Evolución por sets</div>
+      <div class="sec-title">El partido cambia con el tiempo</div>
+      <div class="sec-sub">El partido no es el mismo al inicio que al final. En los primeros sets el saque domina y los colocadores operan con pocas opciones. En los sets finales la recepción se ha adaptado y el juego se abre. Este gráfico muestra esa evolución.</div>
+      <div class="g2" style="margin-bottom:1.5rem">
+        <div class="cw" style="height:240px"><canvas id="c1-sets"></canvas></div>
+        <table class="tbl" style="align-self:start">
+          <thead><tr><th>Set</th><th><svg width="12" height="8" viewBox="0 0 36 24" style="border-radius:2px;vertical-align:middle"><rect width="36" height="12" fill="#fff"/><rect y="12" width="36" height="12" fill="#D7141A"/><polygon points="0,0 18,12 0,24" fill="#11457E"/></svg></th><th><svg width="12" height="8" viewBox="0 0 36 24" style="border-radius:2px;vertical-align:middle"><rect width="36" height="8" fill="#239f40"/><rect y="8" width="36" height="8" fill="#fff"/><rect y="16" width="36" height="8" fill="#DA0000"/></svg></th><th>% 1 atac.</th><th>% &gt;3</th></tr></thead>
+          <tbody>
+            <tr><td>Set 1</td><td class="r" style="color:var(--cze)">2.17</td><td class="r" style="color:var(--ira)">1.91</td><td class="r">45.7%</td><td class="r">15.2%</td></tr>
+            <tr><td>Set 2</td><td class="r" style="color:var(--cze)">2.27</td><td class="r" style="color:var(--ira)">2.08</td><td class="r">41.3%</td><td class="r">19.6%</td></tr>
+            <tr style="background:var(--bg4)"><td><b style="color:var(--gold)">Set 3</b></td><td class="r" style="color:var(--cze)">2.68</td><td class="r" style="color:var(--ira)">2.93</td><td class="r">23.9%</td><td class="r">43.5%</td></tr>
+            <tr style="background:var(--bg4)"><td><b style="color:var(--gold)">Set 4</b></td><td class="r" style="color:var(--cze)">2.72</td><td class="r" style="color:var(--ira)">2.76</td><td class="r">35.2%</td><td class="r">46.3%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="leg"><span><div class="lsq" style="background:#4f46e5"></div>1 atacante</span><span><div class="lsq" style="background:var(--cze)"></div>2 atacantes</span><span><div class="lsq" style="background:var(--green)"></div>3 atacantes</span><span><div class="lsq" style="background:var(--gold)"></div>&gt;3 atacantes</span></div>
+      <div class="cw" style="height:210px;margin-bottom:1.25rem"><canvas id="c1-stacked"></canvas></div>
+      <div class="g3">
+        <div class="insight"><div class="it">Sets 1–2: el saque limita las opciones</div><p>En los dos primeros sets casi la mitad de los intercambios tienen 1 solo atacante disponible. El partido en esta fase es muy directo: el saque presiona, la recepción llega justa, el colocador tiene solo un rematador preparado y el bloqueo rival ya lo espera. El juego es menos rico tácticamente y la variabilidad del ataque es mínima.</p></div>
+        <div class="insight green"><div class="it">Set 3: punto de inflexión del partido</div><p>En el set 3 algo cambia de golpe: los intercambios con sistema completo casi triplican su presencia respecto al set 1. La recepción de ambos equipos se ha adaptado al saque rival tras dos sets de información. Cuando el colocador tiene más opciones, el juego se abre, el bloqueo sufre y Checa saca ventaja de esa complejidad mejor que Irán.</p></div>
+        <div class="insight gold"><div class="it">Set 4: máxima complejidad táctica</div><p>El set 4 es el más complejo del partido — casi la mitad de los intercambios tienen el sistema completo desplegado. Pero Irán, que en el set 1 ganaba el 100% de los puntos con sistema completo, ahora solo gana el 36%. El desgaste acumulado, la presión del marcador y la adaptación de Checa han destruido la efectividad iraní en el escenario que debería ser el más favorable para ellos.</p></div>
+      </div>
+    </div>
+
+  </main>
+  <footer><p>Marcos Pérez Martín · Especialización Deportiva de Voleibol · Prof. Aurelio Ureña · Facultad de Ciencias del Deporte · UGR · 2025</p></footer>
+</div>
+<!-- ANÁLISIS 2 -->
+<div id="a2" class="view">
+  <nav class="top-nav"><div class="top-nav-inner">
+    <button class="back-btn" onclick="showView('home')">← Inicio</button>
+    <button class="nav-btn" onclick="scrollToSec('a2-saque')">Saque</button>
+    <button class="nav-btn" onclick="scrollToSec('a2-k1')">K1</button>
+    <button class="nav-btn" onclick="scrollToSec('a2-k2')">K2</button>
+    <button class="nav-btn" onclick="scrollToSec('a2-rally')">Resistencia</button>
+    <button class="nav-btn" onclick="scrollToSec('a2-prob')">Prob. Victoria</button>
+    <button class="nav-btn" onclick="scrollToSec('a2-sets')">Por sets</button>
+    <button class="nav-btn" onclick="scrollToSec('a2-concl')">Conclusión</button>
+  </div></nav>
+
+  <div class="a-header"><div class="halo"></div><div class="wrap">
+    <div class="eyebrow">Análisis 02 · Secuencias de juego · Saque · Resistencia</div>
+    <h1>Análisis por<br>complejos de<br><em>juego</em></h1>
+    <div class="match-card">
+      <div class="team-col"><svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="12" fill="#fff"/><rect y="12" width="36" height="12" fill="#D7141A"/><polygon points="0,0 18,12 0,24" fill="#11457E"/></svg><div class="team-lbl">Rep. Checa</div><div class="team-sc cze">3</div></div>
+      <div class="match-mid"><div class="vs-lbl">VS</div><div style="font-size:11px;color:var(--dim)">FIVB 2025</div></div>
+      <div class="team-col"><svg class="flag-svg" viewBox="0 0 36 24"><rect width="36" height="8" fill="#239f40"/><rect y="8" width="36" height="8" fill="#fff"/><rect y="16" width="36" height="8" fill="#DA0000"/></svg><div class="team-lbl">Irán</div><div class="team-sc ira">1</div></div>
+    </div>
+    <div class="sets-row"><div class="sc l">Set 1 · 22–25</div><div class="sc w">Set 2 · 27–25</div><div class="sc w">Set 3 · 25–20</div><div class="sc w">Set 4 · 25–21</div></div>
+  </div></div>
+
+  <main>
+
+    <!-- SAQUE -->
+    <div class="section reveal" id="a2-saque">
+      <div class="sec-label">01 · El saque como punto de partida</div>
+      <div class="sec-title">El saque condiciona todo lo que viene después</div>
+      <div class="sec-sub">El saque no es solo una acción de inicio — es la primera decisión táctica del punto. Un buen saque obliga al receptor a recibir mal, el colocador se queda con pocas opciones y el primer ataque es predecible. Un fallo de saque regala el punto directamente. Todo lo que pasa en K1 depende en gran medida de lo que haya pasado en el saque.</div>
+
+      <div class="card" style="margin-bottom:1.5rem">
+        <div class="card-lbl">Indicadores del saque — partido completo</div>
+        <table class="tbl">
+          <thead><tr><th>Indicador</th><th>Definición</th><th class="r">CZE</th><th class="r">IRA</th></tr></thead>
+          <tbody>
+            <tr><td>ERR</td><td style="color:var(--dim);font-size:12px">Errores directos de saque (pierde punto)</td><td class="r" style="color:var(--ira)">18</td><td class="r" style="color:var(--ira)">21</td></tr>
+            <tr><td>ACES</td><td style="color:var(--dim);font-size:12px">Puntos directos de saque</td><td class="r" style="color:var(--green)">6</td><td class="r" style="color:var(--green)">7</td></tr>
+            <tr><td>EFIC</td><td style="color:var(--dim);font-size:12px">Eficacia neta — (aces - errores) / total saques</td><td class="r" style="color:var(--ira)">-12%</td><td class="r" style="color:var(--ira)">-15%</td></tr>
+            <tr><td>VAL</td><td style="color:var(--dim);font-size:12px">Valoración media del saque (escala 0-6)</td><td class="r" style="color:var(--cze)">2.20</td><td class="r">2.12</td></tr>
+            <tr><td>INCIO</td><td style="color:var(--dim);font-size:12px">% saques que inician presión ofensiva (alta valoración)</td><td class="r" style="color:var(--cze)">16%</td><td class="r">13%</td></tr>
+            <tr><td>%PTS</td><td style="color:var(--dim);font-size:12px">% de puntos totales conseguidos sacando</td><td class="r" style="color:var(--cze)">32%</td><td class="r">26%</td></tr>
+            <tr><td>C/B</td><td style="color:var(--dim);font-size:12px">Ratio aces / errores (cuántos aces por cada fallo)</td><td class="r">0.33</td><td class="r">0.33</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sec-label" style="margin-bottom:.875rem">Valoración media del saque (VAL) por set</div>
+      <div class="cw" style="height:240px;margin-bottom:1.5rem"><canvas id="c2-saque-val"></canvas></div>
+
+      <table class="tbl" style="margin-bottom:1.5rem">
+        <thead><tr><th>Set</th><th class="r">CZE ERR</th><th class="r">CZE ACES</th><th class="r">CZE EFIC</th><th class="r">CZE VAL</th><th class="r">IRA ERR</th><th class="r">IRA ACES</th><th class="r">IRA EFIC</th><th class="r">IRA VAL</th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--ira)">Set 1 ← IRA gana</td><td class="r">6</td><td class="r">1</td><td class="r" style="color:var(--ira)">-22%</td><td class="r">2.13</td><td class="r">4</td><td class="r" style="color:var(--green)">3</td><td class="r" style="color:var(--green)">-4%</td><td class="r" style="color:var(--gold)"><b>2.63</b></td></tr>
+          <tr><td style="color:var(--cze)">Set 2 → CZE gana</td><td class="r">6</td><td class="r">2</td><td class="r">-15%</td><td class="r" style="color:var(--cze)"><b>2.38</b></td><td class="r">7</td><td class="r">1</td><td class="r" style="color:var(--ira)">-23%</td><td class="r">2.15</td></tr>
+          <tr><td style="color:var(--cze)">Set 3 → CZE gana</td><td class="r" style="color:var(--green)">1</td><td class="r">1</td><td class="r" style="color:var(--green)">0%</td><td class="r">2.12</td><td class="r" style="color:var(--ira)">6</td><td class="r">2</td><td class="r" style="color:var(--ira)">-20%</td><td class="r" style="color:var(--ira)">1.85</td></tr>
+          <tr><td style="color:var(--cze)">Set 4 → CZE gana</td><td class="r">5</td><td class="r">2</td><td class="r">-13%</td><td class="r">2.17</td><td class="r">4</td><td class="r">1</td><td class="r">-14%</td><td class="r" style="color:var(--ira)">1.77</td></tr>
+        </tbody>
+      </table>
+
+      <div class="g2">
+        <div class="insight ira"><div class="it">Set 1: el saque iraní marca la diferencia</div><p>En el set 1, el saque de Irán es claramente superior. Con una valoración de 2.63 frente al 2.13 de Checa, y solo 4 errores contra 6, Irán consigue que la recepción checa llegue incómoda al colocador de forma sostenida. El resultado es que Checa ataca con pocas opciones en K1 y su eficacia en esa secuencia es la más baja del partido (30%). El buen saque iraní es el origen directo de la victoria en el set 1.</p></div>
+        <div class="insight cze"><div class="it">Set 3: el saque iraní colapsa</div><p>En el set 3 el saque iraní se derrumba. 6 errores directos, solo 2 aces, una valoración de 1.85 — la peor del partido para cualquier equipo. Lo que eso significa en el juego real es que la recepción checa recibe saques menos agresivos, el colocador llega cómodo al balón, y los atacantes pueden posicionarse bien. El resultado es inmediato: la eficacia checa en K1 sube al 42.9% y ganan el set 25-20.</p></div>
+      </div>
+
+      <div style="margin-top:1.5rem">
+        <div class="sec-label" style="margin-bottom:.875rem">Consecuencias inmediatas del saque — Análisis de simetría</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.65;margin-bottom:1rem">¿Qué pasa justo después de cada saque? Esta tabla muestra el porcentaje de veces que ocurrió cada consecuencia inmediata — si el sacador perdió el punto (error), si el rival respondió con X atacantes, o si ganó el punto directamente (ace).</p>
+        <div style="overflow-x:auto">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>Consecuencia inmediata del saque</th>
+              <th class="r"><svg width="12" height="8" viewBox="0 0 36 24" style="border-radius:2px;vertical-align:middle"><rect width="36" height="12" fill="#fff"/><rect y="12" width="36" height="12" fill="#D7141A"/><polygon points="0,0 18,12 0,24" fill="#11457E"/></svg> CZE (N=98)</th>
+              <th class="r"><svg width="12" height="8" viewBox="0 0 36 24" style="border-radius:2px;vertical-align:middle"><rect width="36" height="8" fill="#239f40"/><rect y="8" width="36" height="8" fill="#fff"/><rect y="16" width="36" height="8" fill="#DA0000"/></svg> IRA (N=92)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td style="color:var(--ira)">Pierde punto (error de saque)</td><td class="r" style="color:var(--ira)">18.4% (18)</td><td class="r" style="color:var(--ira)">22.8% (21)</td></tr>
+            <tr><td>Rival responde con freeball (0)</td><td class="r">1.0% (1)</td><td class="r">6.5% (6)</td></tr>
+            <tr><td>Rival responde con 1 atacante</td><td class="r" style="color:var(--cze)">21.4% (21)</td><td class="r">12.0% (11)</td></tr>
+            <tr><td>Rival responde con 2 atacantes</td><td class="r">12.2% (12)</td><td class="r">9.8% (9)</td></tr>
+            <tr><td>Rival responde con 3 atacantes</td><td class="r">15.3% (15)</td><td class="r">15.2% (14)</td></tr>
+            <tr><td>Rival responde con &gt;3 atacantes</td><td class="r">25.5% (25)</td><td class="r">26.1% (24)</td></tr>
+            <tr><td style="color:var(--green)">Gana punto (ace)</td><td class="r" style="color:var(--green)">6.1% (6)</td><td class="r" style="color:var(--green)">7.6% (7)</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <div class="insight gold" style="margin-top:.875rem">
+          <div class="it">Dos tipos de presión distintos en el saque</div>
+          <p>La tabla revela que los dos saques presionan al rival de formas diferentes. El saque de Checa deja a Irán con solo 1 atacante disponible el 21.4% de las veces (21 de 98 saques) — es decir, limita con más frecuencia el sistema ofensivo iraní, reduciendo sus opciones de ataque. El saque de Irán, en cambio, fuerza a Checa a mandar freeball el 6.5% de las veces (6 de 92 saques), frente al 1.0% que Checa fuerza a Irán (1 de 98). Un freeball forzado es la consecuencia más extrema de un mal saque — la recepción ha llegado tan comprometida que el equipo ni puede organizarse para atacar y simplemente devuelve el balón al aire. En el set 1, con el saque iraní en su mejor momento (VAL 2.63, 3 aces en 24 saques), Checa mandó freeball en 2 de esos 24 puntos (8.3%) y respondió con 1 solo atacante en otros 3 (12.5%). El saque iraní en el set 1 no solo sumaba aces — estaba destruyendo el sistema ofensivo checo en K1.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- K1 -->
+    <div class="section reveal" id="a2-k1">
+      <div class="sec-label">02 · Secuencia 1 — K1</div>
+      <div class="sec-title">La primera oportunidad de ataque</div>
+      <div class="sec-sub">K1 es el primer ataque del equipo receptor: recibe el saque directamente, coloca y ataca. Es la secuencia más frecuente del partido y la que mayor volumen de acciones genera. Cuando el saque rival es agresivo, la recepción llega comprometida y el colocador no puede elegir — K1 se convierte en un ataque predecible. Cuando la recepción es limpia, el colocador tiene todas las opciones y K1 es donde se decide gran parte del partido.</div>
+
+      <div class="g2" style="margin-bottom:1.5rem">
+        <div class="card">
+          <div class="card-lbl" style="margin-bottom:1rem">Secuencia 1 — Partido completo</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+            <div>
+              <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.75rem"><svg width="16" height="11" viewBox="0 0 36 24" style="border-radius:2px"><rect width="36" height="12" fill="#fff"/><rect y="12" width="36" height="12" fill="#D7141A"/><polygon points="0,0 18,12 0,24" fill="#11457E"/></svg><span style="font-size:12px;color:var(--muted)">Rep. Checa</span></div>
+              <div class="sr"><span class="sr-l">Total acciones</span><span class="sr-v">71</span></div>
+              <div class="sr"><span class="sr-l">Puntos (Pt)</span><span class="sr-v" style="color:var(--green)">39</span></div>
+              <div class="sr"><span class="sr-l">Pérdidas (L)</span><span class="sr-v" style="color:var(--ira)">12</span></div>
+              <div class="sr"><span class="sr-l">Continuidad (C)</span><span class="sr-v">20</span></div>
+              <div class="sr"><span class="sr-l">Eficacia</span><span class="sr-v" style="color:var(--cze)">38.0%</span></div>
+              <div class="sr"><span class="sr-l">Éxito</span><span class="sr-v" style="color:var(--cze)">54.9%</span></div>
+            </div>
+            <div>
+              <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.75rem"><svg width="16" height="11" viewBox="0 0 36 24" style="border-radius:2px"><rect width="36" height="8" fill="#239f40"/><rect y="8" width="36" height="8" fill="#fff"/><rect y="16" width="36" height="8" fill="#DA0000"/></svg><span style="font-size:12px;color:var(--muted)">Irán</span></div>
+              <div class="sr"><span class="sr-l">Total acciones</span><span class="sr-v">80</span></div>
+              <div class="sr"><span class="sr-l">Puntos (Pt)</span><span class="sr-v" style="color:var(--green)">39</span></div>
+              <div class="sr"><span class="sr-l">Pérdidas (L)</span><span class="sr-v" style="color:var(--ira)">16</span></div>
+              <div class="sr"><span class="sr-l">Continuidad (C)</span><span class="sr-v">25</span></div>
+              <div class="sr"><span class="sr-l">Eficacia</span><span class="sr-v" style="color:var(--muted)">28.7%</span></div>
+              <div class="sr"><span class="sr-l">Éxito</span><span class="sr-v" style="color:var(--muted)">48.8%</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="cw" style="height:260px"><canvas id="c2-k1"></canvas></div>
+      </div>
+
+      <div class="insight cze"><div class="it">Checa más eficaz en K1 con menos acciones</div><p>Checa ataca menos veces en K1 pero consigue los mismos puntos directos con menos errores. La diferencia de 9.3pp en eficacia puede sonar pequeña, pero en el juego real significa que por cada 10 primeros ataques Checa obtiene casi 1 punto más que Irán. A lo largo de 151 acciones de K1 entre los dos equipos, esa diferencia acumulada es la que separa el resultado. El primer ataque del rally bien ejecutado es la base de todo.</p></div>
+
+      <div class="insight" style="margin-top:.875rem"><div class="it">¿Qué representa la eficacia en el juego real?</div><p>La eficacia en K1 es el indicador que más directamente conecta el saque con el ataque. Una recepción limpia le da al colocador tiempo y opciones — puede elegir entre varios atacantes, el bloqueo no sabe adónde va el balón y el rematador llega con comodidad. Una recepción comprometida — porque el saque ha sido agresivo — deja al colocador sin tiempo, con un solo atacante habilitado, y el bloqueo rival ya está posicionado. El set 1 de este partido es el ejemplo perfecto: el buen saque iraní reduce la eficacia checa en K1 al 30%.</p></div>
+
+      <div class="sec-label" style="margin-top:2rem;margin-bottom:.875rem">K1 por set — evolución</div>
+      <div class="cw" style="height:240px;margin-bottom:1rem"><canvas id="c2-k1-sets"></canvas></div>
+      <table class="tbl">
+        <thead><tr><th>Set</th><th class="r">CZE Acc.</th><th class="r">CZE Efic.</th><th class="r">CZE Éxito</th><th class="r">IRA Acc.</th><th class="r">IRA Efic.</th><th class="r">IRA Éxito</th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--ira)">Set 1 (IRA gana)</td><td class="r">20</td><td class="r">30.0%</td><td class="r">50.0%</td><td class="r">17</td><td class="r" style="color:var(--gold)">35.3%</td><td class="r">47.1%</td></tr>
+          <tr><td style="color:var(--cze)">Set 2 (CZE gana)</td><td class="r">19</td><td class="r" style="color:var(--cze)">36.8%</td><td class="r">52.6%</td><td class="r">20</td><td class="r">25.0%</td><td class="r">50.0%</td></tr>
+          <tr><td style="color:var(--cze)">Set 3 (CZE gana)</td><td class="r">14</td><td class="r" style="color:var(--cze)">42.9%</td><td class="r">57.1%</td><td class="r">24</td><td class="r">29.2%</td><td class="r">54.2%</td></tr>
+          <tr><td style="color:var(--cze)">Set 4 (CZE gana)</td><td class="r">18</td><td class="r" style="color:var(--cze)">44.4%</td><td class="r">61.1%</td><td class="r">19</td><td class="r" style="color:var(--ira)">26.3%</td><td class="r">42.1%</td></tr>
+        </tbody>
+      </table>
+      <div class="insight" style="margin-top:.875rem"><div class="it">La eficacia checa en K1 crece set a set: del 30% al 44.4%</div><p>Lo más llamativo de K1 no es un dato aislado — es la tendencia. Checa mejora set a set: 30%, 36.8%, 42.9%, 44.4%. Irán va en sentido contrario: empieza dominando con 35.3% en el set 1 y acaba en 26.3% en el set 4. Dos líneas que se cruzan y que explican el resultado del partido.
+
+En el set 1 Irán es mejor en K1. Su saque está presionando la recepción checa y el colocador checo llega con pocas opciones. Irán gana ese set.
+
+A partir del set 2 la recepción checa se adapta, el colocador empieza a tener más opciones y el primer ataque mejora. Irán en cambio no encuentra la manera de recuperar su eficacia inicial. En el set 3 su saque se derrumba — 6 errores, VAL 1.85 — y con él su K1: 29.2% de eficacia mientras Checa llega al 42.9%. Un primer ataque que funciona al 29% en alto rendimiento es un primer ataque que el rival puede leer y defender con comodidad.
+
+En el set 4 la imagen es ya muy clara: Checa en 44.4%, Irán en 26.3%. El primer ataque iraní ha dejado de ser una amenaza real. El de Checa es el más eficaz del partido. El 25-21 final es la consecuencia directa de esa diferencia acumulada en K1 a lo largo de cuatro sets.</p></div>
+    </div>
+
+    <!-- K2 -->
+    <div class="section reveal" id="a2-k2">
+      <div class="sec-label">03 · Secuencia 2 — K2 y siguientes</div>
+      <div class="sec-title">El contraataque y los rallies prolongados</div>
+      <div class="sec-sub">K2 es el contraataque: el equipo que defendió el primer ataque rival ahora organiza su propio ataque. Es más difícil que K1 porque el balón viene de una defensa y hay menos tiempo para posicionarse. El ratio de atacantes en K2 mide cuántas opciones reales tiene el colocador en esa situación — si el sistema defensivo funciona bien, el colocador puede elegir; si no, ataca con 1 opción o directamente pierde el punto.</div>
+
+      <div class="g2" style="margin-bottom:1.5rem">
+        <div class="card">
+          <div class="card-lbl" style="margin-bottom:1rem">Secuencia 2 — Partido completo</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+            <div>
+              <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.75rem"><svg width="16" height="11" viewBox="0 0 36 24" style="border-radius:2px"><rect width="36" height="12" fill="#fff"/><rect y="12" width="36" height="12" fill="#D7141A"/><polygon points="0,0 18,12 0,24" fill="#11457E"/></svg></div>
+              <div class="sr"><span class="sr-l">Total acciones</span><span class="sr-v">24</span></div>
+              <div class="sr"><span class="sr-l">Puntos</span><span class="sr-v" style="color:var(--green)">9</span></div>
+              <div class="sr"><span class="sr-l">Pérdidas</span><span class="sr-v" style="color:var(--ira)">5</span></div>
+              <div class="sr"><span class="sr-l">Continuidad</span><span class="sr-v">10</span></div>
+              <div class="sr"><span class="sr-l">Eficacia</span><span class="sr-v">16.7%</span></div>
+              <div class="sr"><span class="sr-l">Éxito</span><span class="sr-v">37.5%</span></div>
+              <div class="sr"><span class="sr-l">Ratio atacantes</span><span class="sr-v" style="color:var(--cze)">1.97</span></div>
+            </div>
+            <div>
+              <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.75rem"><svg width="16" height="11" viewBox="0 0 36 24" style="border-radius:2px"><rect width="36" height="8" fill="#239f40"/><rect y="8" width="36" height="8" fill="#fff"/><rect y="16" width="36" height="8" fill="#DA0000"/></svg></div>
+              <div class="sr"><span class="sr-l">Total acciones</span><span class="sr-v">19</span></div>
+              <div class="sr"><span class="sr-l">Puntos</span><span class="sr-v" style="color:var(--green)">10</span></div>
+              <div class="sr"><span class="sr-l">Pérdidas</span><span class="sr-v" style="color:var(--ira)">2</span></div>
+              <div class="sr"><span class="sr-l">Continuidad</span><span class="sr-v">7</span></div>
+              <div class="sr"><span class="sr-l">Eficacia</span><span class="sr-v" style="color:var(--gold)">42.1%</span></div>
+              <div class="sr"><span class="sr-l">Éxito</span><span class="sr-v" style="color:var(--gold)">52.6%</span></div>
+              <div class="sr"><span class="sr-l">Ratio atacantes</span><span class="sr-v" style="color:var(--ira)">1.64</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="cw" style="height:260px"><canvas id="c2-k2"></canvas></div>
+      </div>
+
+      <div class="g2">
+        <div class="insight ira"><div class="it">Irán más eficaz en K2 — pero con menos opciones</div><p>Cuando el primer ataque no cierra el punto y el rally continúa, Irán contraataca mejor que Checa — 42.1% de eficacia frente al 16.7%. El sistema defensivo iraní recupera bien los ataques checos y construye contraataques de calidad. El problema es que lo hace con menos opciones: con un ratio de 1.64 atacantes disponibles frente al 1.97 de Checa, el colocador iraní en K2 tiene menos con qué trabajar aunque lo ejecute mejor.</p></div>
+        <div class="insight cze"><div class="it">Checa genera más opciones en el contraataque</div><p>Cuando Checa contraataca, su sistema defensivo llega mejor posicionado y el colocador tiene casi 2 atacantes disponibles de media. Para el bloqueo iraní eso es un problema — no puede comprometerse con un atacante concreto porque hay otro disponible. Checa convierte menos en K2 que Irán, pero lo hace con un ataque más complejo y más difícil de defender, lo que beneficia a las secuencias siguientes.</p></div>
+      </div>
+
+      <div class="sec-label" style="margin-top:2rem;margin-bottom:.875rem">K3, K4 y Penalti — los rallies que se complican</div>
+      <table class="tbl" style="margin-bottom:1rem">
+        <thead><tr><th>Secuencia</th><th>Definición</th><th class="r">CZE Acc.</th><th class="r">CZE Efic.</th><th class="r">IRA Acc.</th><th class="r">IRA Efic.</th></tr></thead>
+        <tbody>
+          <tr><td>K3 — Reataque</td><td style="color:var(--dim);font-size:12px">Ataque tras un ataque propio previo en el mismo punto (bloqueo-cobertura o defensa de contra-bloqueo)</td><td class="r">6</td><td class="r" style="color:var(--green)">83.3%</td><td class="r">5</td><td class="r" style="color:var(--ira)">-20.0%</td></tr>
+          <tr><td>K4 — Ataque regalado</td><td style="color:var(--dim);font-size:12px">Ataque tras un freeball rival (balón fácil), siempre que no sea un penalti</td><td class="r">3</td><td class="r" style="color:var(--green)">100%</td><td class="r">2</td><td class="r" style="color:var(--green)">100%</td></tr>
+          <tr><td>Penalti</td><td style="color:var(--dim);font-size:12px">Ataque con 1 solo atacante inmediatamente después de un freeball rival (balón que pasa la red sin ataque estructurado)</td><td class="r">2</td><td class="r">0.0%</td><td class="r">4</td><td class="r" style="color:var(--gold)">50.0%</td></tr>
+        </tbody>
+      </table>
+      <div class="insight red"><div class="it">K3: la diferencia más extrema del partido</div><p>En K3 — el reataque, es decir el ataque que realiza un equipo después de que su propio ataque previo haya sido bloqueado o defendido y el balón vuelva — la diferencia es extrema. Checa gana 5 de sus 6 reataque sin un solo error (83.3% de eficacia). Irán en cambio pierde más puntos de los que gana en esa misma situación (-20.0%). En el juego real significa que cuando el bloqueo iraní devuelve el balón al campo checo, Checa construye otro ataque de calidad y lo cierra. Cuando el bloqueo checo devuelve el balón al campo iraní, Irán no consigue cerrarlo. Es la diferencia de calidad en la segunda línea ofensiva.</p></div>
+    </div>
+
+    <!-- RALLY -->
+    <div class="section reveal" id="a2-rally">
+      <div class="sec-label">04 · Resistencia y rally</div>
+      <div class="sec-title">¿Quién aguanta los intercambios largos?</div>
+      <div class="sec-sub">Cuando el punto no se cierra en el primer o segundo ataque, comienza el desgaste. Aquí se ve quién aguanta mejor los rallies largos — si la efectividad sube cuando el intercambio se prolonga (resistencia positiva) o si el equipo pierde precisión y se viene abajo (resistencia negativa). Es el reflejo directo de lo que sucede en K3 y K4.</div>
+
+      <div class="g2" style="margin-bottom:1.5rem">
+        <div class="card" style="text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:1rem;padding:2rem">
+          <div><div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.25rem;justify-content:center"><svg width="20" height="13" viewBox="0 0 36 24" style="border-radius:2px"><rect width="36" height="12" fill="#fff"/><rect y="12" width="36" height="12" fill="#D7141A"/><polygon points="0,0 18,12 0,24" fill="#11457E"/></svg><span style="font-size:12px;color:var(--muted)">República Checa</span></div><div style="font-family:'Bebas Neue',sans-serif;font-size:4rem;color:var(--cze);line-height:1">+70.1%</div><div style="font-size:12px;color:var(--muted)">se fortalece en rallies largos</div></div>
+          <div style="width:100%;height:1px;background:var(--border)"></div>
+          <div><div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.25rem;justify-content:center"><svg width="20" height="13" viewBox="0 0 36 24" style="border-radius:2px"><rect width="36" height="8" fill="#239f40"/><rect y="8" width="36" height="8" fill="#fff"/><rect y="16" width="36" height="8" fill="#DA0000"/></svg><span style="font-size:12px;color:var(--muted)">Irán</span></div><div style="font-family:'Bebas Neue',sans-serif;font-size:4rem;color:var(--ira);line-height:1">-70.1%</div><div style="font-size:12px;color:var(--muted)">pierde efectividad en rallies largos</div></div>
+        </div>
+        <div class="cw" style="height:260px"><canvas id="c2-rally"></canvas></div>
+      </div>
+
+      <div class="card" style="margin-bottom:1.25rem">
+        <div class="card-lbl">Rendimiento por longitud del rally — partido completo (W/T exactos)</div>
+        <table class="tbl">
+          <thead><tr><th>Nº intercambios</th><th class="r">P(saque gana)</th><th class="r">CZE total</th><th class="r">IRA total</th></tr></thead>
+          <tbody>
+            <tr><td>0 intercambios</td><td class="r">25.0% (13/52)</td><td class="r">51.9% (27/52)</td><td class="r">48.1% (25/52)</td></tr>
+            <tr><td>1 intercambio</td><td class="r">16.1% (15/93)</td><td class="r">52.7% (49/93)</td><td class="r">47.3% (44/93)</td></tr>
+            <tr><td>2 intercambios</td><td class="r">64.5% (20/31)</td><td class="r">48.4% (15/31)</td><td class="r">51.6% (16/31)</td></tr>
+            <tr><td>3 intercambios</td><td class="r">36.4% (4/11)</td><td class="r">45.5% (5/11)</td><td class="r">54.5% (6/11)</td></tr>
+            <tr style="background:var(--bg4)"><td><b style="color:var(--cze)">4 intercambios</b></td><td class="r">100% (1/1)</td><td class="r" style="color:var(--cze)"><b>100% (1/1)</b></td><td class="r" style="color:var(--ira)"><b>0% (0/1)</b></td></tr>
+            <tr style="background:var(--bg4)"><td><b style="color:var(--cze)">5 intercambios</b></td><td class="r">100% (1/1)</td><td class="r" style="color:var(--cze)"><b>100% (1/1)</b></td><td class="r" style="color:var(--ira)"><b>0% (0/1)</b></td></tr>
+            <tr style="background:var(--bg4)"><td><b style="color:var(--cze)">6 intercambios</b></td><td class="r">100% (1/1)</td><td class="r" style="color:var(--cze)"><b>100% (1/1)</b></td><td class="r" style="color:var(--ira)"><b>0% (0/1)</b></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="g2">
+        <div class="insight cze"><div class="it">A partir de 4 intercambios, Checa gana el 100%</div><p>Es el dato más contundente del partido en cuanto a rally: a partir de 4 intercambios Checa gana el 100% de los puntos. Irán no gana ninguno. Esto no es casualidad — es la consecuencia acumulada de todo lo anterior. Cuando el rally se prolonga, el sistema checo mantiene la complejidad ofensiva (más opciones en K2 y K3) y la ejecución no baja. El iraní, en cambio, sufre el desgaste y pierde precisión a medida que aumentan los intercambios.</p></div>
+        <div class="insight gold"><div class="it">Resistencia invertida: los sets cortos son de Irán</div><p>Un detalle que matiza el dato global de resistencia: en los sets 1, 2 y 3 — los sets ajustados — Irán aguanta ligeramente mejor en los rallies de 2-3 intercambios. La gran resistencia checa (+70.5%) se concentra en el set 4, cuando el partido ya está decidido. Esto sugiere que la resistencia de Checa no es tanto una cualidad constante como una consecuencia del dominio táctico acumulado — cuando Checa domina el intercambio, los rallies largos son más favorables porque el sistema checo llega mejor organizado.</p></div>
+      </div>
+
+      <div class="sec-label" style="margin-top:2rem;margin-bottom:.875rem">Resistencia por set</div>
+      <table class="tbl">
+        <thead><tr><th>Set</th><th class="r">CZE resistencia</th><th class="r">IRA resistencia</th><th>Quién domina rallies largos</th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--ira)">Set 1 (IRA gana)</td><td class="r" style="color:var(--ira)">-2.0%</td><td class="r" style="color:var(--green)">+2.0%</td><td style="color:var(--muted)">Irán</td></tr>
+          <tr><td style="color:var(--cze)">Set 2 (CZE gana)</td><td class="r" style="color:var(--ira)">-3.0%</td><td class="r" style="color:var(--green)">+3.0%</td><td style="color:var(--muted)">Irán</td></tr>
+          <tr><td style="color:var(--cze)">Set 3 (CZE gana)</td><td class="r" style="color:var(--ira)">-5.6%</td><td class="r" style="color:var(--green)">+5.6%</td><td style="color:var(--muted)">Irán</td></tr>
+          <tr style="background:var(--bg4)"><td style="color:var(--cze)"><b>Set 4 (CZE gana)</b></td><td class="r" style="color:var(--cze)"><b>+70.5%</b></td><td class="r" style="color:var(--ira)"><b>-70.5%</b></td><td style="color:var(--cze)"><b>Checa domina totalmente</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PROB VICTORIA -->
+    <div class="section reveal" id="a2-prob">
+      <div class="sec-label">05 · Probabilidad de victoria por atacantes</div>
+      <div class="sec-title">¿Cuándo es cada equipo más letal?</div>
+      <div class="sec-sub">Este gráfico conecta los dos análisis: ¿cuánto cambia la probabilidad de ganar el punto según las opciones que tiene el colocador en ese intercambio? Un equipo que gana mucho con 1 solo atacante es letal incluso bajo presión. Uno que solo gana cuando tiene el sistema completo es predecible y vulnerable.</div>
+
+      <div class="cw" style="height:300px;margin-bottom:1.5rem"><canvas id="c2-prob"></canvas></div>
+
+      <table class="tbl" style="margin-bottom:1.5rem">
+        <thead><tr><th>Atacantes disponibles</th><th class="r">CZE % (W/T)</th><th class="r">IRA % (W/T)</th><th class="r">Diferencia</th></tr></thead>
+        <tbody>
+          <tr><td>0 (freeball)</td><td class="r">16.7% (1/6)</td><td class="r">20.0% (1/5)</td><td class="r" style="color:var(--ira)">IRA +3.3pp</td></tr>
+          <tr><td>1 atacante</td><td class="r" style="color:var(--cze)">66.7% (22/33)</td><td class="r">56.8% (21/37)</td><td class="r" style="color:var(--cze)">CZE +9.9pp</td></tr>
+          <tr><td>2 atacantes</td><td class="r">66.7% (8/12)</td><td class="r" style="color:var(--gold)">76.9% (10/13)</td><td class="r" style="color:var(--ira)">IRA +10.2pp</td></tr>
+          <tr><td>3 atacantes</td><td class="r" style="color:var(--cze)">89.5% (17/19)</td><td class="r">76.5% (13/17)</td><td class="r" style="color:var(--cze)"><b>CZE +13.0pp</b></td></tr>
+          <tr><td>&gt;3 atacantes</td><td class="r" style="color:var(--cze)">79.3% (23/29)</td><td class="r">65.6% (21/32)</td><td class="r" style="color:var(--cze)"><b>CZE +13.7pp</b></td></tr>
+        </tbody>
+      </table>
+
+      <div class="sec-label" style="margin-bottom:.875rem">Probabilidad de victoria por set</div>
+      <div class="set-tabs">
+        <button class="set-tab active" onclick="showSetProb(0)">Partido completo</button>
+        <button class="set-tab" onclick="showSetProb(1)">Set 1</button>
+        <button class="set-tab" onclick="showSetProb(2)">Set 2</button>
+        <button class="set-tab" onclick="showSetProb(3)">Set 3</button>
+        <button class="set-tab" onclick="showSetProb(4)">Set 4</button>
+      </div>
+      <div class="cw" style="height:280px"><canvas id="c2-prob-set"></canvas></div>
+      <div id="prob-insight" class="insight" style="margin-top:.875rem">
+        <div class="it" id="prob-insight-title">Partido completo: Checa superior con 3 y &gt;3 atacantes</div>
+        <p id="prob-insight-text">La brecha más relevante del partido completo es la de 3 atacantes: Checa 89.5% vs Irán 76.5% (13pp). Es el escenario donde el colocador checo tiene suficiente amplitud para descolocar el bloqueo iraní sin necesitar el sistema completo desplegado.</p>
+      </div>
+    </div>
+
+    <!-- SETS -->
+    <div class="section reveal" id="a2-sets">
+      <div class="sec-label">06 · Evolución del partido</div>
+      <div class="sec-title">El hilo conductor del 3-1</div>
+      <div class="sec-sub">Cada set tiene su propia historia, pero hay un hilo conductor claro. Este gráfico muestra cómo evolucionan los dos indicadores más importantes — la eficacia en K1 y la calidad del saque — a lo largo del partido. Las líneas sólidas son K1, las punteadas son el saque.</div>
+
+      <div class="cw" style="height:280px;margin-bottom:1.5rem"><canvas id="c2-evol"></canvas></div>
+      <div class="leg"><span><div class="lsq" style="background:var(--cze)"></div>CZE Eficacia K1</span><span><div class="lsq" style="background:var(--ira)"></div>IRA Eficacia K1</span><span><div class="lsq" style="background:rgba(59,130,246,0.4)"></div>CZE VAL Saque</span><span><div class="lsq" style="background:rgba(239,68,68,0.4)"></div>IRA VAL Saque</span></div>
+
+      <div class="g4" style="margin:1.5rem 0">
+        <div class="b4-cell"><div class="b4-lbl" style="color:var(--ira)">Set 1 — IRA gana</div><div style="font-size:12px;color:var(--muted);line-height:1.8;padding:.5rem 0">IRA VAL saque: <b style="color:var(--gold)">2.63</b><br>IRA K1 eficacia: <b>35.3%</b><br>CZE K1 eficacia: <b>30.0%</b><br>IRA K2 ratio atac.: <b>2.67</b></div></div>
+        <div class="b4-cell"><div class="b4-lbl" style="color:var(--cze)">Set 2 — CZE gana</div><div style="font-size:12px;color:var(--muted);line-height:1.8;padding:.5rem 0">CZE VAL saque: <b style="color:var(--cze)">2.38</b><br>CZE K1 eficacia: <b>36.8%</b><br>IRA K2 eficacia: <b style="color:var(--ira)">-20%</b><br>IRA K2 ratio atac.: <b style="color:var(--ira)">1.00</b></div></div>
+        <div class="b4-cell"><div class="b4-lbl" style="color:var(--cze)">Set 3 — CZE gana</div><div style="font-size:12px;color:var(--muted);line-height:1.8;padding:.5rem 0">IRA ERR saque: <b style="color:var(--ira)">6</b><br>CZE K1 eficacia: <b style="color:var(--cze)">42.9%</b><br>CZE K2 ratio atac.: <b style="color:var(--cze)">1.92</b><br>IRA &gt;3 prob.: <b>73%</b></div></div>
+        <div class="b4-cell"><div class="b4-lbl" style="color:var(--cze)">Set 4 — CZE gana</div><div style="font-size:12px;color:var(--muted);line-height:1.8;padding:.5rem 0">CZE K1 eficacia: <b style="color:var(--cze)">44.4%</b><br>IRA K1 eficacia: <b style="color:var(--ira)">26.3%</b><br>IRA &gt;3 prob.: <b style="color:var(--ira)">36%</b><br>CZE resistencia: <b style="color:var(--cze)">+70.5%</b></div></div>
+      </div>
+    </div>
+
+    <!-- CONCLUSIÓN -->
+    <div class="section reveal" id="a2-concl">
+      <div class="sec-label">07 · Conclusión</div>
+      <div class="sec-title">¿Qué explica el 3-1?</div>
+      <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:2rem">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:1px;background:var(--border);border-radius:10px;overflow:hidden;margin-bottom:2rem">
+          <div style="background:var(--bg4);padding:1.1rem;text-align:center"><div style="font-family:'Bebas Neue',sans-serif;font-size:1.9rem;color:var(--cze);line-height:1">+9.3pp</div><div style="font-size:10px;color:var(--dim);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.06em;margin-top:.25rem">ventaja K1 global</div></div>
+          <div style="background:var(--bg4);padding:1.1rem;text-align:center"><div style="font-family:'Bebas Neue',sans-serif;font-size:1.9rem;color:var(--gold);line-height:1">+13pp</div><div style="font-size:10px;color:var(--dim);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.06em;margin-top:.25rem">prob. con 3 atacantes</div></div>
+          <div style="background:var(--bg4);padding:1.1rem;text-align:center"><div style="font-family:'Bebas Neue',sans-serif;font-size:1.9rem;color:var(--green);line-height:1">83.3%</div><div style="font-size:10px;color:var(--dim);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.06em;margin-top:.25rem">eficacia CZE en K3</div></div>
+          <div style="background:var(--bg4);padding:1.1rem;text-align:center"><div style="font-family:'Bebas Neue',sans-serif;font-size:1.9rem;color:var(--acc);line-height:1">100%</div><div style="font-size:10px;color:var(--dim);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.06em;margin-top:.25rem">rallies 4+ intercambios</div></div>
+        </div>
+        <div style="border-left:3px solid var(--acc);padding-left:1.25rem;margin-bottom:1.25rem"><p style="font-size:14px;color:var(--text);line-height:1.8">El set 1 lo gana Irán gracias a un saque superior (VAL 2.63 vs 2.13) que reduce las opciones del colocador checo en K1. Con una recepción limitada, Checa solo tiene 30% de eficacia en su primer ataque — el valor más bajo del partido. Es el único set donde los indicadores de inicio favorecen a Irán.</p></div>
+        <div style="border-left:3px solid var(--cze);padding-left:1.25rem;margin-bottom:1.25rem"><p style="font-size:14px;color:var(--text);line-height:1.8">A partir del set 2, el saque iraní se deteriora y la recepción checa se libera. Checa mejora progresivamente en K1 — del 30% al 44.4% en el set 4 — mientras Irán se estanca al 26.3%. Con más opciones disponibles, el colocador checo puede descolocar el bloqueo: con 3 atacantes disponibles gana 13pp más que Irán.</p></div>
+        <div style="border-left:3px solid var(--gold);padding-left:1.25rem"><p style="font-size:14px;color:var(--text);line-height:1.8">Los rallies largos son el factor definitivo que cierra la discusión. Checa tiene 83.3% de eficacia en K3 frente al -20% de Irán, y gana el 100% de los rallies con 4 o más intercambios. Cuando el punto no se cierra en el primer o segundo ataque, Checa se fortalece e Irán se derrumba. La diferencia entre los dos equipos no está en las condiciones de salida del ataque — está en quién aguanta cuando el partido se complica.</p></div>
+      </div>
+    </div>
+
+  </main>
+  <footer><p>Marcos Pérez Martín · Especialización Deportiva de Voleibol · Prof. Aurelio Ureña · Facultad de Ciencias del Deporte · UGR · 2025</p></footer>
+</div>
+<!-- MODAL CONCLUSIÓN A1 -->
+<div id="modal-overlay" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:1.5rem">
+  <div id="modal-box" style="background:var(--bg2);border:1px solid var(--border2);border-radius:16px;max-width:700px;width:100%;max-height:90vh;overflow-y:auto;position:relative;transform:translateY(24px);opacity:0;transition:transform .35s ease,opacity .35s ease">
+    <button onclick="closeModal()" style="position:sticky;top:1rem;float:right;margin:1rem 1rem 0 0;background:var(--bg4);border:1px solid var(--border2);border-radius:6px;color:var(--muted);font-size:18px;width:32px;height:32px;cursor:pointer;z-index:10">×</button>
+    <div style="padding:2.5rem;padding-top:1.5rem">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.14em;color:var(--acc);text-transform:uppercase;margin-bottom:.5rem">Conclusión · Análisis 01</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:.02em;margin-bottom:1.75rem">El mensaje central</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-radius:10px;overflow:hidden;margin-bottom:2rem">
+        <div style="background:var(--bg3);padding:1.1rem;text-align:center"><div style="font-family:'Bebas Neue',sans-serif;font-size:1.9rem;color:var(--gold);line-height:1">+0.70</div><div style="font-size:10px;color:var(--dim);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.06em;margin-top:.25rem">atacantes set 1→4</div></div>
+        <div style="background:var(--bg3);padding:1.1rem;text-align:center"><div style="font-family:'Bebas Neue',sans-serif;font-size:1.9rem;color:var(--green);line-height:1">+13pp</div><div style="font-size:10px;color:var(--dim);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.06em;margin-top:.25rem">CZE con 3 atacantes</div></div>
+        <div style="background:var(--bg3);padding:1.1rem;text-align:center"><div style="font-family:'Bebas Neue',sans-serif;font-size:1.9rem;color:var(--cze);line-height:1">100%</div><div style="font-size:10px;color:var(--dim);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.06em;margin-top:.25rem">rallies 4+ intercambios</div></div>
+        <div style="background:var(--bg3);padding:1.1rem;text-align:center"><div style="font-family:'Bebas Neue',sans-serif;font-size:1.9rem;color:var(--acc);line-height:1">50.5%</div><div style="font-size:10px;color:var(--dim);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.06em;margin-top:.25rem">intercambios ≥3 atac.</div></div>
+      </div>
+      <div style="border-left:3px solid var(--acc);padding-left:1.25rem;margin-bottom:1.25rem"><p style="font-size:14px;color:var(--text);line-height:1.8">El número de atacantes disponibles es el termómetro directo de la salud del sistema ofensivo. Cuando es alto, el colocador manda y el bloqueo rival no puede anticiparse. Cuando es bajo, el bloqueo rival ya sabe adónde irá el balón antes de que el colocador toque.</p></div>
+      <div style="border-left:3px solid var(--cze);padding-left:1.25rem;margin-bottom:1.25rem"><p style="font-size:14px;color:var(--text);line-height:1.8">Checa ganó 3-1 sin generar más opciones que Irán — la media de atacantes disponibles es prácticamente idéntica (2.47 vs 2.44). La diferencia estuvo en la conversión: con 3 atacantes disponibles Checa ganó el punto el 89.5% de las veces, 13pp por encima de Irán.</p></div>
+      <div style="border-left:3px solid var(--gold);padding-left:1.25rem"><p style="font-size:14px;color:var(--text);line-height:1.8">El partido evolucionó hacia mayor complejidad ofensiva set a set — de 2.04 de media en el set 1 a 2.74 en el set 4. En los primeros sets el 41-46% de los intercambios tienen 1 solo atacante disponible. Entrenar únicamente con el sistema completo es prepararse para la situación menos frecuente al inicio del partido.</p></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const G='rgba(255,255,255,0.05)',T='rgba(255,255,255,0.28)';
+Chart.defaults.color=T; Chart.defaults.borderColor=G;
+const tt={backgroundColor:'#16161c',borderColor:'rgba(255,255,255,.08)',borderWidth:1,padding:10};
+const CZE='#3b82f6',IRA='#ef4444',GOLD='#f59e0b',GREEN='#22c55e',ACC='#818cf8';
+let chartsInitialized={a1:false,a2:false};
+let probSetChart=null;
+
+// NAVIGATION
+function showView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+  if(id!=='home') initCharts(id);
+}
+function scrollToSec(id){
+  const el=document.getElementById(id);
+  if(el) el.scrollIntoView({behavior:'smooth'});
+}
+
+// MODAL
+function openModal(){
+  const overlay=document.getElementById('modal-overlay');
+  const box=document.getElementById('modal-box');
+  overlay.style.display='flex';
+  requestAnimationFrame(()=>{box.style.transform='translateY(0)';box.style.opacity='1';});
+  document.body.style.overflow='hidden';
+}
+function closeModal(){
+  const box=document.getElementById('modal-box');
+  box.style.transform='translateY(24px)'; box.style.opacity='0';
+  setTimeout(()=>{document.getElementById('modal-overlay').style.display='none';document.body.style.overflow='';},350);
+}
+document.getElementById('modal-overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+// REVEAL
+const revObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');revObs.unobserve(e.target);}});
+},{threshold:0.07});
+
+function initCharts(view){
+  if(view==='a1'&&!chartsInitialized.a1){chartsInitialized.a1=true;initA1();}
+  if(view==='a2'&&!chartsInitialized.a2){chartsInitialized.a2=true;initA2();}
+  document.querySelectorAll(`#${view} .reveal`).forEach(el=>revObs.observe(el));
+}
+
+// ===== A1 CHARTS =====
+function initA1(){
+  new Chart(document.getElementById('c1-freq'),{type:'bar',
+    data:{labels:['1 atacante','2 atacantes','3 atacantes','>3 atacantes'],
+      datasets:[{data:[70,25,36,61],backgroundColor:[ACC,CZE,GREEN,GOLD],borderWidth:0,borderRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{...tt,callbacks:{label:c=>` ${c.raw} (${(c.raw/192*100).toFixed(1)}%)`}}},
+      scales:{x:{grid:{color:G},ticks:{color:T}},y:{grid:{color:G},ticks:{color:T},beginAtZero:true}}}
+  });
+
+  new Chart(document.getElementById('c1-prob'),{type:'bar',
+    data:{labels:['0','1','2','3','>3'],
+      datasets:[
+        {label:'Rep. Checa',data:[16.7,66.7,66.7,89.5,79.3],backgroundColor:CZE,borderWidth:0,borderRadius:4},
+        {label:'Irán',data:[20.0,56.8,76.9,76.5,65.6],backgroundColor:IRA,borderWidth:0,borderRadius:4}
+      ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{...tt,callbacks:{label:c=>` ${c.dataset.label}: ${c.raw}%`}}},
+      scales:{x:{grid:{color:G},ticks:{color:T},title:{display:true,text:'Nº atacantes disponibles',color:T,font:{size:11}}},
+        y:{grid:{color:G},ticks:{color:T,callback:v=>v+'%'},min:0,max:100}}}
+  });
+
+  new Chart(document.getElementById('c1-equipos'),{type:'bar',
+    data:{labels:['1','2','3','>3'],
+      datasets:[
+        {label:'Rep. Checa',data:[33,12,19,29],backgroundColor:CZE,borderWidth:0,borderRadius:4},
+        {label:'Irán',data:[37,13,17,32],backgroundColor:IRA,borderWidth:0,borderRadius:4}
+      ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{...tt,callbacks:{label:c=>` ${c.dataset.label}: ${c.raw}`}}},
+      scales:{x:{grid:{color:G},ticks:{color:T},title:{display:true,text:'Nº atacantes disponibles',color:T,font:{size:11}}},
+        y:{grid:{color:G},ticks:{color:T},beginAtZero:true}}}
+  });
+
+  new Chart(document.getElementById('c1-ventaja'),{type:'bar',
+    data:{labels:['Rep. Checa','Irán'],
+      datasets:[
+        {label:'Generador',data:[31.0,47.6],backgroundColor:GREEN,borderWidth:0,borderRadius:{topLeft:4,topRight:4}},
+        {label:'Neutro',data:[24.1,23.8],backgroundColor:ACC,borderWidth:0},
+        {label:'Riesgo',data:[44.8,28.6],backgroundColor:IRA,borderWidth:0}
+      ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{...tt,callbacks:{label:c=>` ${c.dataset.label}: ${c.raw.toFixed(1)}%`}}},
+      scales:{x:{grid:{color:G},ticks:{color:T,font:{size:13}},stacked:true},
+        y:{grid:{color:G},ticks:{color:T,callback:v=>v+'%'},stacked:true,max:100}}}
+  });
+
+  new Chart(document.getElementById('c1-sets'),{type:'line',
+    data:{labels:['Set 1','Set 2','Set 3','Set 4'],
+      datasets:[
+        {label:'Rep. Checa',data:[2.17,2.27,2.68,2.72],borderColor:CZE,pointRadius:6,pointBackgroundColor:CZE,pointBorderColor:'#08080b',pointBorderWidth:2,tension:0.35,fill:false,borderWidth:2.5},
+        {label:'Irán',data:[1.91,2.08,2.93,2.76],borderColor:IRA,pointRadius:6,pointBackgroundColor:IRA,pointBorderColor:'#08080b',pointBorderWidth:2,tension:0.35,fill:false,borderWidth:2.5,borderDash:[6,3]}
+      ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{...tt,callbacks:{label:c=>` ${c.dataset.label}: ${c.raw.toFixed(2)}`}}},
+      scales:{x:{grid:{color:G},ticks:{color:T}},y:{grid:{color:G},ticks:{color:T},min:1.5,max:3.3,title:{display:true,text:'Media atacantes disponibles',color:T,font:{size:11}}}}}
+  });
+
+  new Chart(document.getElementById('c1-stacked'),{type:'bar',
+    data:{labels:['Set 1','Set 2','Set 3','Set 4'],
+      datasets:[
+        {label:'1 atacante',data:[45.7,41.3,23.9,35.2],backgroundColor:'#4f46e5',borderWidth:0},
+        {label:'2 atacantes',data:[19.6,19.6,13.0,1.9],backgroundColor:CZE,borderWidth:0},
+        {label:'3 atacantes',data:[19.6,19.6,19.6,16.7],backgroundColor:GREEN,borderWidth:0},
+        {label:'>3 atacantes',data:[15.2,19.6,43.5,46.3],backgroundColor:GOLD,borderWidth:0}
+      ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{...tt,callbacks:{label:c=>` ${c.dataset.label}: ${c.raw.toFixed(1)}%`}}},
+      scales:{x:{grid:{color:G},ticks:{color:T},stacked:true},y:{grid:{color:G},ticks:{color:T,callback:v=>v+'%'},stacked:true,max:100}}}
+  });
+}
+
+// ===== A2 CHARTS =====
+function initA2(){
+  new Chart(document.getElementById('c2-saque-val'),{type:'bar',
+    data:{labels:['Partido','Set 1','Set 2','Set 3','Set 4'],
+      datasets:[
+        {label:'CZE VAL',data:[2.20,2.13,2.38,2.12,2.17],backgroundColor:CZE,borderWidth:0,borderRadius:4},
+        {label:'IRA VAL',data:[2.12,2.63,2.15,1.85,1.77],backgroundColor:IRA,borderWidth:0,borderRadius:4}
+      ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{...tt,callbacks:{label:c=>` ${c.dataset.label}: ${c.raw}`}}},
+      scales:{x:{grid:{color:G},ticks:{color:T}},y:{grid:{color:G},ticks:{color:T},min:1.4,max:3.0,title:{display:true,text:'Valoración media saque (0-6)',color:T,font:{size:11}}}}}
+  });
+
+  new Chart(document.getElementById('c2-k1'),{type:'bar',
+    data:{labels:['Partido','Set 1','Set 2','Set 3','Set 4'],
+      datasets:[
+        {label:'CZE Eficacia K1',data:[38.0,30.0,36.8,42.9,44.4],backgroundColor:CZE,borderWidth:0,borderRadius:4},
+        {label:'IRA Eficacia K1',data:[28.7,35.3,25.0,29.2,26.3],backgroundColor:IRA,borderWidth:0,borderRadius:4}
+      ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{...tt,callbacks:{label:c=>` ${c.dataset.label}: ${c.raw}%`}}},
+      scales:{x:{grid:{color:G},ticks:{color:T}},y:{grid:{color:G},ticks:{color:T,callback:v=>v+'%'},title:{display:true,text:'Eficacia K1 (%)',color:T,font:{size:11}}}}}
+  });
+
+  new Chart(document.getElementById('c2-k1-sets'),{type:'line',
+    data:{labels:['Set 1','Set 2','Set 3','Set 4'],
+      datasets:[
+        {label:'CZE K1',data:[30.0,36.8,42.9,44.4],borderColor:CZE,pointRadius:6,pointBackgroundColor:CZE,pointBorderColor:'#08080b',pointBorderWidth:2,tension:0.35,fill:false,borderWidth:2.5},
+        {label:'IRA K1',data:[35.3,25.0,29.2,26.3],borderColor:IRA,pointRadius:6,pointBackgroundColor:IRA,pointBorderColor:'#08080b',pointBorderWidth:2,tension:0.35,fill:false,borderWidth:2.5,borderDash:[6,3]}
+      ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{...tt,callbacks:{label:c=>` ${c.dataset.label}: ${c.raw}%`}}},
+      scales:{x:{grid:{color:G},ticks:{color:T}},y:{grid:{color:G},ticks:{color:T,callback:v=>v+'%'},title:{display:true,text:'Eficacia K1 (%)',color:T,font:{size:11}}}}}
+  });
+
+  new Chart(document.getElementById('c2-k2'),{type:'bar',
+    data:{labels:['Eficacia (%)','Éxito (%)','Ratio Atac. ×20'],
+      datasets:[
+        {label:'Rep. Checa',data:[16.7,37.5,1.97*20],backgroundColor:CZE,borderWidth:0,borderRadius:4},
+        {label:'Irán',data:[42.1,52.6,1.64*20],backgroundColor:IRA,borderWidth:0,borderRadius:4}
+      ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{...tt,callbacks:{label:c=>{const v=c.dataIndex===2?(c.raw/20).toFixed(2):c.raw.toFixed(1)+'%';return ` ${c.dataset.label}: ${v}`;}}},
+      scales:{x:{grid:{color:G},ticks:{color:T}},y:{grid:{color:G},ticks:{color:T},beginAtZero:true}}}}
+  });
+
+  new Chart(document.getElementById('c2-rally'),{type:'bar',
+    data:{labels:['0','1','2','3','4','5','6'],
+      datasets:[
+        {label:'Rep. Checa',data:[51.9,52.7,48.4,45.5,100,100,100],backgroundColor:CZE,borderWidth:0,borderRadius:4},
+        {label:'Irán',data:[48.1,47.3,51.6,54.5,0,0,0],backgroundColor:IRA,borderWidth:0,borderRadius:4}
+      ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{...tt,callbacks:{label:c=>` ${c.dataset.label}: ${c.raw}%`}}},
+      scales:{x:{grid:{color:G},ticks:{color:T},title:{display:true,text:'Nº intercambios en el rally',color:T,font:{size:11}}},
+        y:{grid:{color:G},ticks:{color:T,callback:v=>v+'%'},max:100,title:{display:true,text:'% victorias',color:T,font:{size:11}}}}}
+  });
+
+  new Chart(document.getElementById('c2-prob'),{type:'bar',
+    data:{labels:['0','1','2','3','>3'],
+      datasets:[
+        {label:'Rep. Checa',data:[16.7,66.7,66.7,89.5,79.3],backgroundColor:CZE,borderWidth:0,borderRadius:4},
+        {label:'Irán',data:[20.0,56.8,76.9,76.5,65.6],backgroundColor:IRA,borderWidth:0,borderRadius:4}
+      ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{...tt,callbacks:{label:c=>` ${c.dataset.label}: ${c.raw}%`}}},
+      scales:{x:{grid:{color:G},ticks:{color:T},title:{display:true,text:'Nº atacantes disponibles',color:T,font:{size:11}}},
+        y:{grid:{color:G},ticks:{color:T,callback:v=>v+'%'},min:0,max:100}}}
+  });
+
+  const probData=[
+    {cze:[16.7,66.7,66.7,89.5,79.3],ira:[20.0,56.8,76.9,76.5,65.6],
+      title:'Partido completo: Checa superior con 3 y >3 atacantes',
+      text:'La brecha más relevante del partido completo es la de 3 atacantes: Checa 89.5% vs Irán 76.5% (13pp). Es el escenario donde el colocador checo tiene suficiente amplitud para descolocar el bloqueo iraní sin necesitar el sistema completo desplegado.'},
+    {cze:[0,60,75,100,80],ira:[50,55,100,60,100],
+      title:'Set 1 (Irán gana): Irán superior con 2 y >3 atacantes',
+      text:'El set que gana Irán muestra por qué: con 2 atacantes gana el 100% y con >3 también el 100%. El buen saque iraní limita la recepción checa en K1 y cuando Irán tiene el sistema desplegado, es imparable en este set.'},
+    {cze:[33,62,60,75,100],ira:[null,55,75,80,100],
+      title:'Set 2 (Checa gana): Checa toma la delantera con >3 atacantes',
+      text:'Checa gana el 100% de los intercambios con >3 atacantes en el set 2. Es el primer set donde el sistema completo checo es imbatible. El saque de Checa mejora (VAL 2.38) y su K1 sube al 36.8%.'},
+    {cze:[null,50,67,100,60],ira:[0,57,33,100,73],
+      title:'Set 3 (Checa gana): Checa perfecta con 3 atacantes',
+      text:'Checa gana el 100% con 3 atacantes en el set 3. El saque iraní colapsa (VAL 1.85, 6 errores) liberando la recepción checa y disparando los atacantes disponibles en K1. Checa gana 25-20.'},
+    {cze:[0,82,null,75,79],ira:[0,62,100,80,36],
+      title:'Set 4 (Checa gana): el colapso iraní con >3 atacantes',
+      text:'Irán solo gana el 36% de los intercambios con >3 atacantes en el set 4 — frente al 100% del set 1 y el set 2. Este colapso es el dato más llamativo del partido y explica por qué Checa domina el set 4 de forma tan contundente (25-21).'}
+  ];
+  window._probData=probData;
+
+  probSetChart=new Chart(document.getElementById('c2-prob-set'),{type:'bar',
+    data:{labels:['0','1','2','3','>3'],
+      datasets:[
+        {label:'Rep. Checa',data:probData[0].cze,backgroundColor:CZE,borderWidth:0,borderRadius:4},
+        {label:'Irán',data:probData[0].ira,backgroundColor:IRA,borderWidth:0,borderRadius:4}
+      ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{...tt,callbacks:{label:c=>c.raw!==null?` ${c.dataset.label}: ${c.raw}%`:' Sin datos'}}},
+      scales:{x:{grid:{color:G},ticks:{color:T}},y:{grid:{color:G},ticks:{color:T,callback:v=>v+'%'},min:0,max:100}}}
+  });
+
+  new Chart(document.getElementById('c2-evol'),{type:'line',
+    data:{labels:['Set 1','Set 2','Set 3','Set 4'],
+      datasets:[
+        {label:'CZE Eficacia K1',data:[30.0,36.8,42.9,44.4],borderColor:CZE,pointRadius:5,pointBackgroundColor:CZE,tension:0.35,fill:false,borderWidth:2.5},
+        {label:'IRA Eficacia K1',data:[35.3,25.0,29.2,26.3],borderColor:IRA,pointRadius:5,pointBackgroundColor:IRA,tension:0.35,fill:false,borderWidth:2.5,borderDash:[6,3]},
+        {label:'CZE VAL Saque',data:[2.13,2.38,2.12,2.17],borderColor:'rgba(59,130,246,0.4)',pointRadius:4,pointBackgroundColor:CZE,tension:0.35,fill:false,borderWidth:1.5,borderDash:[3,3]},
+        {label:'IRA VAL Saque',data:[2.63,2.15,1.85,1.77],borderColor:'rgba(239,68,68,0.4)',pointRadius:4,pointBackgroundColor:IRA,tension:0.35,fill:false,borderWidth:1.5,borderDash:[3,3]}
+      ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{...tt,callbacks:{label:c=>` ${c.dataset.label}: ${c.raw}`}}},
+      scales:{x:{grid:{color:G},ticks:{color:T}},y:{grid:{color:G},ticks:{color:T}}}}
+  });
+}
+
+function showSetProb(idx){
+  document.querySelectorAll('.set-tab').forEach((t,i)=>t.classList.toggle('active',i===idx));
+  const d=window._probData[idx];
+  probSetChart.data.datasets[0].data=d.cze;
+  probSetChart.data.datasets[1].data=d.ira;
+  probSetChart.update();
+  document.getElementById('prob-insight-title').textContent=d.title;
+  document.getElementById('prob-insight-text').textContent=d.text;
+}
+</script>
+</body>
+</html>
